@@ -1,5 +1,6 @@
 ﻿[<AutoOpen>]
-module Reports.XmlTemplate
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module VainZero.Florida.Reports.XmlTemplate
 
 let dayByDay =
   """

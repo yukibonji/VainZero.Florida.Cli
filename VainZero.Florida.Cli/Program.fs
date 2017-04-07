@@ -1,4 +1,4 @@
-﻿namespace Reports
+﻿namespace VainZero.Florida.Reports
 
 open System
 open System.Diagnostics
@@ -6,6 +6,7 @@ open System.IO
 open Chessie.ErrorHandling
 open FsYaml
 open VainZero.Misc
+open VainZero.Florida.Configurations
 
 module Program =
   let createWeeklyReport date =

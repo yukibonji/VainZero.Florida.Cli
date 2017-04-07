@@ -54,11 +54,11 @@
     <Compile Include="Net.fs" />
     <Compile Include="Text.fs" />
     <Compile Include="Types.fs" />
-    <Compile Include="Funcs.fs" />
-    <Compile Include="App.fs" />
-    <Compile Include="XmlTemplate.fs" />
-    <Compile Include="WeeklyReports.fs" />
-    <Compile Include="DailyReports.fs" />
+    <Compile Include="Configurations.fs" />
+    <Compile Include="Reports.Funcs.fs" />
+    <Compile Include="Reports.XmlTemplate.fs" />
+    <Compile Include="Reports.WeeklyReports.fs" />
+    <Compile Include="Reports.DailyReports.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -1,10 +1,9 @@
-﻿namespace Reports
+﻿namespace VainZero.Florida.Reports
 
 open VainZero.Misc
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module ``日別の内容`` =
-  open Types.WeeklyReports
-
   let ofMap self =
     {
       ``日``                = self |> Map.tryFind "日"

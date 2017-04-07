@@ -1,9 +1,5 @@
-﻿[<AutoOpen>]
-module Reports.Types
+﻿namespace VainZero.Florida.Configurations
 
-open System
-
-module App =
   type MailSettings =
     {
       Host                  : string
@@ -31,7 +27,8 @@ module App =
       Mail                  : option<MailSettings>
     }
 
-module DailyReports =
+namespace VainZero.Florida.Reports
+
   type ``作業項目`` =
     {
       ``案件``              : string
@@ -51,7 +48,6 @@ module DailyReports =
       CCs                   : option<array<string>>
     }
 
-module WeeklyReports =
   /// Day of week in Kanji
   type ``曜日`` = string
 
@@ -62,7 +58,7 @@ module WeeklyReports =
     }
 
   type ``日別`` =
-    DailyReports.``作業項目``
+    ``作業項目``
 
   type ``日別の内容`` =
     {
@@ -85,6 +81,3 @@ module WeeklyReports =
       ``来週予定``          : string
       ``その他``            : string
     }
-
-type ``日報`` = DailyReports.``日報``
-type ``週報`` = WeeklyReports.``週報``

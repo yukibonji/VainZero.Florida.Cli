@@ -1,4 +1,4 @@
-﻿namespace Reports
+﻿namespace VainZero.Florida.Reports
 
 open System
 open System.IO
@@ -7,8 +7,9 @@ open VainZero.Collections
 open VainZero.ErrorHandling
 open VainZero.Misc
 open VainZero.Text
-open WeeklyReports
+open VainZero.Florida.Configurations
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module WeeklyReports =
   let ofYaml yaml =
     Yaml.load<``週報``> yaml

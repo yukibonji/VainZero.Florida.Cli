@@ -1,4 +1,4 @@
-﻿namespace Reports
+﻿namespace VainZero.Florida.Reports
 
 open System
 open System.IO
@@ -10,11 +10,10 @@ open VainZero.Misc
 open VainZero.Net
 open VainZero.Text
 open FsYaml
-open Reports.Types.WeeklyReports
+open VainZero.Florida.Configurations
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module DailyReports =
-  open Types.DailyReports
-
   let ofYaml yaml =
     Yaml.load<``日報``> yaml
 

@@ -1,6 +1,7 @@
 ﻿namespace VainZero.Florida.Configurations
 
-  type MailSettings =
+  /// 日報を送信するときの設定を表す。
+  type DailyReportSubmitConfig =
     {
       Host                  : string
       /// Your short name is recommended.
@@ -24,7 +25,7 @@
       /// ユーザーの名前
       UserName              : option<string>
       /// メール送信時の設定
-      Mail                  : option<MailSettings>
+      Mail                  : option<DailyReportSubmitConfig>
     }
 
 namespace VainZero.Florida.Reports

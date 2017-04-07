@@ -137,3 +137,8 @@ namespace VainZero.Florida.Data
 
   type IDatabase =
     abstract Connect: unit -> IDataContext
+
+namespace VainZero.Florida.UI.Notifications
+  type INotifier =
+    abstract NotifyWarning: string -> unit
+    abstract Confirm: string -> bool

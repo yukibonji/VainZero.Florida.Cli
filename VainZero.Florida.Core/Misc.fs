@@ -72,10 +72,12 @@ module Console =
     Console.Write(msg + " (Y/n)")
     let rec loop () =
       match Console.ReadLine() with
-      | "Y" | "Yes" | "yes"         -> true
-      | "N" | "No" | "no" | "n"     -> false
+      | null | "N" | "No" | "no" | "n"
+        -> false
+      | "Y" | "Yes" | "yes"
+        -> true
       | _ -> loop ()
-    in loop ()
+    loop ()
 
   let runApp f =
     try

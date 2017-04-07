@@ -54,11 +54,11 @@ module DayOfWeek =
 module DateTime =
   open System
 
-  let dayOfWeekId (date: DateTime) =
+  let private dayOfWeekIndex (date: DateTime) =
     date.DayOfWeek |> int
 
   let theLatestSunday (date: DateTime) =
-    date.AddDays(date |> dayOfWeekId |> (~-) |> float)
+    date.AddDays(date |> dayOfWeekIndex |> (~-) |> float)
 
   let weekDays date =
     let sunday = date |> theLatestSunday

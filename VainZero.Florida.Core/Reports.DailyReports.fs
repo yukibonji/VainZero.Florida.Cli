@@ -93,19 +93,21 @@ module DailyReports =
       dailyReports |> sumUpActivities
     in
       {
-        ``担当者``            =
+        ``担当者`` =
           {
-            ``所属部署``      = App.config.Department   |> Option.getOr ""
-            ``名前``          = App.config.UserName     |> Option.getOr ""
+            ``所属部署`` =
+              App.config.Department |> Option.getOr ""
+            ``名前`` =
+              App.config.UserName |> Option.getOr ""
           }
-        ``今週の主な活動``      =
+        ``今週の主な活動`` =
           activityNames |> String.concatWithLineBreak
-        ``進捗``                =
+        ``進捗`` =
           activityNames |> Array.map (fun activityName ->
             sprintf "%s: 0%c" activityName '%'
             )
           |> String.concatWithLineBreak
-        ``日別の内容``        =
+        ``日別の内容`` =
           dailyReports |> Array.map (fun (dow, drepo, _) ->
             let ``曜日`` = dow |> DayOfWeek.toKanji
             let ``実績`` = drepo.``作業実績`` |> Array.map eliminateNotes
@@ -113,15 +115,17 @@ module DailyReports =
             )
           |> Map.ofArray
           |> ``日別の内容``.ofMap
-        ``今週実績``          =
+        ``今週実績`` =
           activityNames |> Array.choose (fun activityName ->
             activityNotes |> Map.tryFind activityName |> Option.map (fun note ->
               (activityName, note)
               ))
           |> Map.ofArray
           |> Yaml.dump
-        ``来週予定``          = ""
-        ``その他``            = ""
+        ``来週予定`` =
+          ""
+        ``その他`` =
+          ""
       }
 
   let generateWeeklyReports date =

@@ -3,39 +3,56 @@
   /// 日報を送信するときの設定を表す。
   type DailyReportSubmitConfig =
     {
-      Host                  : string
+      Host:
+        string
       /// Your short name is recommended.
-      Name                  : string
-      Addr                  : string
-      Password              : option<string>
-      TOs                   : array<string>
-      CCs                   : array<string>
-      BCCs                  : array<string>
+      Name:
+        string
+      Addr:
+        string
+      Password:
+        option<string>
+      TOs:
+        array<string>
+      CCs:
+        array<string>
+      BCCs:
+        array<string>
       /// Mail body header.
-      Header                : option<string>
+      Header:
+        option<string>
       /// Mail body footer.
-      Footer                : option<string>
+      Footer:
+        option<string>
     }
 
   type Config =
     {
-      ReportsDir            : string
+      ReportsDir:
+        string
       /// 所属部署
-      Department            : option<string>
+      Department:
+        option<string>
       /// ユーザーの名前
-      UserName              : option<string>
+      UserName:
+        option<string>
       /// メール送信時の設定
-      Mail                  : option<DailyReportSubmitConfig>
+      Mail:
+        option<DailyReportSubmitConfig>
     }
 
 namespace VainZero.Florida.Reports
 
   type ``作業項目`` =
     {
-      ``案件``              : string
-      ``内容``              : string
-      ``工数``              : float
-      ``備考``              : option<string>
+      ``案件``:
+        string
+      ``内容``:
+        string
+      ``工数``:
+        float
+      ``備考``:
+        option<string>
     }
 
   type ``作業実績`` =
@@ -43,16 +60,22 @@ namespace VainZero.Florida.Reports
 
   type ``日報`` =
     {
-      ``作業実績``          : ``作業実績``
-      ``翌営業日の予定``    : string
-      ``その他``            : option<string>
-      CCs                   : option<array<string>>
+      ``作業実績``:
+        ``作業実績``
+      ``翌営業日の予定``:
+        string
+      ``その他``:
+        option<string>
+      CCs:
+        option<array<string>>
     }
 
   type ``担当者`` =
     {
-      ``所属部署``          : string
-      ``名前``              : string
+      ``所属部署``:
+        string
+      ``名前``:
+        string
     }
 
   type ``日別`` =
@@ -71,13 +94,20 @@ namespace VainZero.Florida.Reports
 
   type ``週報`` =
     {
-      ``担当者``            : ``担当者``
-      ``今週の主な活動``    : string
-      ``進捗``              : string
-      ``日別の内容``        : ``日別の内容``
-      ``今週実績``          : string
-      ``来週予定``          : string
-      ``その他``            : string
+      ``担当者``:
+        ``担当者``
+      ``今週の主な活動``:
+        string
+      ``進捗``:
+        string
+      ``日別の内容``:
+        ``日別の内容``
+      ``今週実績``:
+        string
+      ``来週予定``:
+        string
+      ``その他``:
+        string
     }
 
 namespace VainZero.Florida.Data

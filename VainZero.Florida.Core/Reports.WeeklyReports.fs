@@ -27,20 +27,25 @@ module WeeklyReports =
 
   type DayRow =
     {
-      Date              : string
-      DayOfWeek         : string
-      Project           : string
-      Content           : string
-      Hours             : string
+      Date:
+        string
+      DayOfWeek:
+        string
+      Project:
+        string
+      Content:
+        string
+      Hours:
+        string
     }
   with
     static member Empty =
       {
-        Date            = ""
-        DayOfWeek       = ""
-        Project         = ""
-        Content         = ""
-        Hours           = ""
+        Date = ""
+        DayOfWeek = ""
+        Project = ""
+        Content = ""
+        Hours = ""
       }
 
   let dayRows (wr: ``週報``) =
@@ -56,15 +61,18 @@ module WeeklyReports =
             yield!
               dayList |> Array.mapi (fun i d ->
                 {
-                  Date            =
+                  Date =
                     if i = 0
                     then sunday.AddDays(dow |> float).ToString("MM/dd")
                     else ""
-                  DayOfWeek       =
+                  DayOfWeek =
                     if i = 0 then dowKanji else ""
-                  Project         = d.``案件``
-                  Content         = d.``内容``
-                  Hours           = d.``工数`` |> sprintf "%.1f"
+                  Project =
+                    d.``案件``
+                  Content =
+                    d.``内容``
+                  Hours =
+                    d.``工数`` |> sprintf "%.1f"
                 })
     |]
     |> Array.tailpad 10 DayRow.Empty

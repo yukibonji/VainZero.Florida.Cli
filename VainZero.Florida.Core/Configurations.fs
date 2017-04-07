@@ -7,10 +7,14 @@ open FsYaml
 module Config =
   let empty =
     {
-      ReportsDir            = "./"
-      Department            = None
-      UserName              = None
-      Mail                  = None
+      ReportsDir =
+        "./"
+      Department =
+        None
+      UserName =
+        None
+      Mail =
+        None
     }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]

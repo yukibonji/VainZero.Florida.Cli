@@ -78,3 +78,26 @@ namespace VainZero.Florida.Reports
       ``来週予定``          : string
       ``その他``            : string
     }
+
+namespace VainZero.Florida.Data
+  open System
+  open VainZero.Florida.Reports
+
+  type IKeyValueRepository<'key, 'value> =
+    abstract FindAsync: 'key -> Async<option<'value>>
+    abstract AddOrUpdateAsync: 'key * 'value -> Async<unit>
+
+  type IDailyReportRepository =
+    inherit IKeyValueRepository<DateTime, ``日報``>
+
+  type IWeeklyReportRepository =
+    inherit IKeyValueRepository<DateTime * DateTime, ``週報``>
+
+  type IDataContext =
+    inherit IDisposable
+
+    abstract DailyReports: IDailyReportRepository
+    abstract WeeklyReports: IWeeklyReportRepository
+
+  type IDatabase =
+    abstract Connect: unit -> IDataContext

@@ -51,6 +51,7 @@
     <Compile Include="Misc.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="ErrorHandling-vz.fs" />
+    <Compile Include="IO.FileSystem.fs" />
     <Compile Include="Net.fs" />
     <Compile Include="Text.fs" />
     <Compile Include="Types.fs" />
@@ -59,6 +60,7 @@
     <Compile Include="Reports.XmlTemplate.fs" />
     <Compile Include="Reports.WeeklyReports.fs" />
     <Compile Include="Reports.DailyReports.fs" />
+    <Compile Include="Data.FileSystemDatabase.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

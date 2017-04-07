@@ -21,13 +21,8 @@ module Program =
     WeeklyReports.generateExcel date
     Process.Start("excel", WeeklyReports.excelPath date) |> ignore
 
-  let rec procCommandLine args =
+  let procCommandLine args =
     match args with
-    | [] ->
-        printfn "Input command line:"
-        match Console.ReadLine() with
-        | null -> ()
-        | line -> procCommandLine (line |> String.splitBySpaces |> Array.toList)
     | "wr" :: dateStr :: _ ->
         createWeeklyReport (dateStr |> DateTime.Parse)
     | "wr" :: _ ->
@@ -43,6 +38,15 @@ module Program =
     | _ ->
         failwithf "Unknown commands: %s" (args |> String.concat " ")
 
+  let run args =
+    if args |> Array.isEmpty then
+      printfn "Input command line:"
+      match Console.ReadLine() with
+      | null -> ()
+      | line -> procCommandLine (line |> String.splitBySpaces |> Array.toList)
+    else
+      procCommandLine (args |> Array.toList)
+
   [<EntryPoint>]
-  let main argv =
-    Console.runApp (fun () -> procCommandLine (argv |> Array.toList))
+  let main args =
+    Console.runApp (fun () -> run args)

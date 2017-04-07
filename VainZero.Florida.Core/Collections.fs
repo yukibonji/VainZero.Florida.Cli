@@ -8,7 +8,7 @@ module Seq =
     c
 
 module List =
-  /// Add x's to back so that the list has at least n elements.
+  /// Add elements on the bottom of the specified list so that list has at least n elements.
   let tailpad n x self =
     let len     = self |> List.length
     let count   = max 0 (n - len)

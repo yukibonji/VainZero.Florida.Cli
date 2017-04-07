@@ -48,9 +48,6 @@ namespace VainZero.Florida.Reports
       CCs                   : option<array<string>>
     }
 
-  /// Day of week in Kanji
-  type ``曜日`` = string
-
   type ``担当者`` =
     {
       ``所属部署``          : string

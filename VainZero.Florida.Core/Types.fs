@@ -124,11 +124,16 @@ namespace VainZero.Florida.Data
   type IWeeklyReportRepository =
     inherit IKeyValueRepository<DateTime * DateTime, ``週報``>
 
+  type IWeeklyReportExcelRepository =
+    abstract Open: DateTime * DateTime -> unit
+    abstract AddOrUpdateAsync: DateTime * DateTime * ``週報`` -> Async<unit>
+
   type IDataContext =
     inherit IDisposable
 
     abstract DailyReports: IDailyReportRepository
     abstract WeeklyReports: IWeeklyReportRepository
+    abstract WeeklyReportExcels: IWeeklyReportExcelRepository
 
   type IDatabase =
     abstract Connect: unit -> IDataContext

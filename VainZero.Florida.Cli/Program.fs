@@ -45,6 +45,4 @@ module Program =
 
   [<EntryPoint>]
   let main argv =
-    let exitCode =
-      Console.runApp (fun () -> procCommandLine (argv |> Array.toList))
-    in exitCode
+    Console.runApp (fun () -> procCommandLine (argv |> Array.toList))

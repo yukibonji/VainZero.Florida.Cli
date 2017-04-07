@@ -82,8 +82,8 @@ module Console =
   let runApp f =
     try
       f ()
-      0
+      0 // success
     with
     | e ->
       eprintfn "ERROR! %s" e.Message
-      1
+      1 // error

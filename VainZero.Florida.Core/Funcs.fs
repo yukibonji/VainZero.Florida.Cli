@@ -16,8 +16,8 @@ module ``日別の内容`` =
       ``土``                = self |> Map.tryFind "土"
     }
 
-  let toList self =
-    [
+  let toArray self =
+    [|
       self.``日``
       self.``月``
       self.``火``
@@ -25,9 +25,9 @@ module ``日別の内容`` =
       self.``木``
       self.``金``
       self.``土``
-    ]
+    |]
 
-  let toMap self =
-    List.zip (DayOfWeek.kanjis |> Array.toList) (self |> toList)
-    |> List.choose (fun (k, vOpt) -> vOpt |> Option.map (fun v -> (k, v)))
-    |> Map.ofList
+  let toMap this =
+    Array.zip DayOfWeek.kanjis (this |> toArray)
+    |> Array.choose (fun (k, vOpt) -> vOpt |> Option.map (fun v -> (k, v)))
+    |> Map.ofArray

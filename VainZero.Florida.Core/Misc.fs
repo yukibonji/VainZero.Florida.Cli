@@ -18,7 +18,7 @@ module String =
   let replace (src: string) (dst: string) (s: string) =
     s.Replace(src, dst)
 
-  let replaceEach (xs: list<string * string>) (s: string): string =
+  let replaceEach (xs: seq<string * string>) (s: string): string =
     s |> fold xs (fun (src, dst) s -> s.Replace(src, dst))
 
   let concatWithLineBreak xs =
@@ -62,7 +62,7 @@ module DateTime =
 
   let weekDays date =
     let sunday = date |> theLatestSunday
-    in [ for i in 0..6 -> sunday.AddDays(float i) ]
+    [|for i in 0..6 -> sunday.AddDays(float i)|]
 
 module Console =
   open System

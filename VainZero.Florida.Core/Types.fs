@@ -11,9 +11,9 @@ module App =
       Name                  : string
       Addr                  : string
       Password              : option<string>
-      TOs                   : list<string>
-      CCs                   : list<string>
-      BCCs                  : list<string>
+      TOs                   : array<string>
+      CCs                   : array<string>
+      BCCs                  : array<string>
       /// Mail body header.
       Header                : option<string>
       /// Mail body footer.
@@ -41,14 +41,14 @@ module DailyReports =
     }
 
   type ``作業実績`` =
-    list<``作業項目``>
+    array<``作業項目``>
 
   type ``日報`` =
     {
       ``作業実績``          : ``作業実績``
       ``翌営業日の予定``    : string
       ``その他``            : option<string>
-      CCs                   : option<list<string>>
+      CCs                   : option<array<string>>
     }
 
 module WeeklyReports =
@@ -66,13 +66,13 @@ module WeeklyReports =
 
   type ``日別の内容`` =
     {
-      ``日``                : option<list<``日別``>>
-      ``月``                : option<list<``日別``>>
-      ``火``                : option<list<``日別``>>
-      ``水``                : option<list<``日別``>>
-      ``木``                : option<list<``日別``>>
-      ``金``                : option<list<``日別``>>
-      ``土``                : option<list<``日別``>>
+      ``日``                : option<array<``日別``>>
+      ``月``                : option<array<``日別``>>
+      ``火``                : option<array<``日別``>>
+      ``水``                : option<array<``日別``>>
+      ``木``                : option<array<``日別``>>
+      ``金``                : option<array<``日別``>>
+      ``土``                : option<array<``日別``>>
     }
 
   type ``週報`` =

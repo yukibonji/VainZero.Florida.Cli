@@ -7,27 +7,26 @@ module Seq =
       (^t: (member Add: ^x -> unit) (c, x))
     c
 
-module List =
-  /// Add elements on the bottom of the specified list so that list has at least n elements.
-  let tailpad n x self =
-    let len     = self |> List.length
-    let count   = max 0 (n - len)
-    in self @ (List.replicate count x)
+module Array =
+  open System.Collections.Generic
 
-  let unique (xs: list<'x>) =
-    xs |> List.fold
-      (fun (acc, set) x ->
-          if set |> Set.contains x
-          then (acc, set)
-          else (x :: acc, set |> Set.add x)
-          )
-      ([], Set.empty)
-    |> fst
-    |> List.rev
+  /// Add elements on the bottom of the specified array
+  /// so that the result array has at least the specified length.
+  let tailpad count x xs =
+    let paddingCount = count - (xs |> Array.length) |> max 0
+    Array.append xs (Array.replicate paddingCount x)
+
+  let unique (xs: array<'x>) =
+    let ys = ResizeArray(xs.Length)
+    let set = HashSet()
+    for x in xs do
+      if set.Add(x) then
+        ys.Add(x)
+    ys |> Seq.toArray
 
 module Map =
   let singleton k v =
-    Map.ofList [(k, v)]
+    Map.empty |> Map.add k v
 
   let appendWith f l r =
     let combine m k v =

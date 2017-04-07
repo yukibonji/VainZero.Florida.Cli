@@ -39,7 +39,7 @@ module DailyReports =
 
   let loadAll dates =
     dates
-    |> List.map (fun date -> async {
+    |> Array.map (fun date -> async {
         try
           let! repo = loadAsync date
           return repo |> pass
@@ -48,9 +48,9 @@ module DailyReports =
         })
     |> Async.Parallel
     |> Async.RunSynchronously
-    |> Trial.collect
+    |> Trial.collectToArray
     |> (function
-        | Pass rs -> rs |> List.choose id
+        | Pass rs -> rs |> Array.choose id
         | Warn (_, msgs)
         | Fail msgs ->
             ( "Failed to load some of daily reports. Error messages are following:"
@@ -62,15 +62,15 @@ module DailyReports =
   let private sumUpActivities dailyReports =
     let (activityNames, activityNoteList) =
       dailyReports
-      |> List.collect (fun (_, drepo, _) -> drepo.``作業実績``)
-      |> List.map (fun activity ->
+      |> Array.collect (fun (_, drepo, _) -> drepo.``作業実績``)
+      |> Array.map (fun activity ->
           let title = sprintf "%s/%s" (activity.``案件``) (activity.``内容``)
           let noteOpt = activity.``備考``
           in (title, (title, noteOpt))
           )
-      |> List.unzip
+      |> Array.unzip
     let activityNames =
-      activityNames |> List.unique
+      activityNames |> Array.unique
     let activityNotes =
       Map.empty |> fold activityNoteList (fun (title, noteOpt) m ->
           match noteOpt with
@@ -102,24 +102,24 @@ module DailyReports =
         ``今週の主な活動``      =
           activityNames |> String.concatWithLineBreak
         ``進捗``                =
-          activityNames |> List.map (fun activityName ->
+          activityNames |> Array.map (fun activityName ->
             sprintf "%s: 0%c" activityName '%'
             )
           |> String.concatWithLineBreak
         ``日別の内容``        =
-          dailyReports |> List.map (fun (dow, drepo, _) ->
+          dailyReports |> Array.map (fun (dow, drepo, _) ->
             let ``曜日`` = dow |> DayOfWeek.toKanji
-            let ``実績`` = drepo.``作業実績`` |> List.map eliminateNotes
+            let ``実績`` = drepo.``作業実績`` |> Array.map eliminateNotes
             in (``曜日``, ``実績``)
             )
-          |> Map.ofList
+          |> Map.ofArray
           |> ``日別の内容``.ofMap
         ``今週実績``          =
-          activityNames |> List.choose (fun activityName ->
+          activityNames |> Array.choose (fun activityName ->
             activityNotes |> Map.tryFind activityName |> Option.map (fun note ->
               (activityName, note)
               ))
-          |> Map.ofList
+          |> Map.ofArray
           |> Yaml.dump
         ``来週予定``          = ""
         ``その他``            = ""
@@ -153,14 +153,16 @@ module DailyReports =
       |> List.choose id
       |> String.concatWithLineBreak
     let tos =
-      if mail.TOs |> List.isEmpty
+      if mail.TOs |> Array.isEmpty
       then failwith "Mail.TOs mustn't be empty."
-      else mail.TOs |> List.map MailAddress.ofString
+      else mail.TOs |> Array.map MailAddress.ofString
     let ccs =
-      mail.CCs @ (dailyReport.CCs |> Option.getOr [])
-      |> List.map MailAddress.ofString
+      Array.append
+        mail.CCs
+        (dailyReport.CCs |> Option.getOr Array.empty)
+      |> Array.map MailAddress.ofString
     let bccs = 
-      mail.BCCs |> List.map MailAddress.ofString
+      mail.BCCs |> Array.map MailAddress.ofString
     let stringizeAddrs ss =
       "[" + (ss |> Seq.map MailAddress.nameAddr |> String.concat "; ") + "]"
     do

@@ -11,6 +11,6 @@ module Xml =
 
   let escape (unescaped: string): string =
     [|"\r\n"; "\r"; "\n"|]
-    |> Seq.fold
+    |> Array.fold
       (fun linebreak unescaped -> unescaped.Replace(linebreak, "&#10;"))
       (SecurityElement.Escape(unescaped))

@@ -6,7 +6,7 @@ module Operators =
 
   let flip f x y = f y x
 
-  let fold xs f s =
+  let fold (xs: seq<'x>) (f: 'x -> 's -> 's) (s: 's): 's =
     xs |> Seq.fold (fun s x -> f x s) s
 
 module String =

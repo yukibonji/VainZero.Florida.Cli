@@ -27,16 +27,19 @@ module String =
   let splitBySpaces (self: string) =
     self.Split([| ' '; '\t'; '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
 
-module Enum =
-  open System
-
-  let getValues<'t> =
-    Enum.GetValues(typeof<'t>) |> Seq.cast<'t> |> Array.ofSeq
-
 module DayOfWeek =
   open System
 
-  let all = Enum.getValues<DayOfWeek>
+  let all =
+    [|
+      DayOfWeek.Sunday
+      DayOfWeek.Monday
+      DayOfWeek.Tuesday
+      DayOfWeek.Wednesday
+      DayOfWeek.Thursday
+      DayOfWeek.Friday
+      DayOfWeek.Saturday
+    |]
 
   let kanjis = [|"日"; "月"; "火"; "水"; "木"; "金"; "土"|]
 

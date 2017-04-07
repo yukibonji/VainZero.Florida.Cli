@@ -4,6 +4,11 @@ open System
 open System.IO
 open System.Net.Mail
 open Chessie.ErrorHandling
+open VainZero.Collections
+open VainZero.ErrorHandling
+open VainZero.Misc
+open VainZero.Net
+open VainZero.Text
 open FsYaml
 open Reports.Types.WeeklyReports
 
@@ -115,7 +120,7 @@ module DailyReports =
               (activityName, note)
               ))
           |> Map.ofList
-          |> Yaml.myDump<Map<string, string>>
+          |> Yaml.dump
         ``来週予定``          = ""
         ``その他``            = ""
       }
@@ -123,7 +128,7 @@ module DailyReports =
   let generateWeeklyReports date =
     let wr = date|> toWeeklyReport
     let data =
-      wr |> Yaml.myDump
+      wr |> Yaml.dump
       |> String.replace "\r\n\r\n" "\r\n"   // Workaround the bug YamlDotNet can't handle linebreaks
       |> Regex.replace @"\b(\w+): >-?" "$1: |"
       |> Regex.replace @"\b(\w+): ''" ("$1: |" + Environment.NewLine)

@@ -3,6 +3,10 @@
 open System
 open System.IO
 open FsYaml
+open VainZero.Collections
+open VainZero.ErrorHandling
+open VainZero.Misc
+open VainZero.Text
 open WeeklyReports
 
 module WeeklyReports =

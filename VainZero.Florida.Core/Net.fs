@@ -1,5 +1,7 @@
 ﻿namespace VainZero.Net
 
+open VainZero.Misc
+
 module MailAddress =
   open System
   open System.Net

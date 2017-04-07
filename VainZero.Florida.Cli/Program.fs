@@ -5,6 +5,7 @@ open System.Diagnostics
 open System.IO
 open Chessie.ErrorHandling
 open FsYaml
+open VainZero.Misc
 
 module Program =
   let createWeeklyReport date =

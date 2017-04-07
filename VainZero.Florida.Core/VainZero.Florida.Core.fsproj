@@ -48,6 +48,17 @@
       <Link>ErrorHandling.fs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Misc.fs" />
+    <Compile Include="Collections.fs" />
+    <Compile Include="ErrorHandling-vz.fs" />
+    <Compile Include="Net.fs" />
+    <Compile Include="Text.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Funcs.fs" />
+    <Compile Include="App.fs" />
+    <Compile Include="XmlTemplate.fs" />
+    <Compile Include="WeeklyReports.fs" />
+    <Compile Include="DailyReports.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

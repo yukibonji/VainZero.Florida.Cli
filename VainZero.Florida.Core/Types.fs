@@ -1,0 +1,90 @@
+﻿[<AutoOpen>]
+module Reports.Types
+
+open System
+
+module App =
+  type MailSettings =
+    {
+      Host                  : string
+      /// Your short name is recommended.
+      Name                  : string
+      Addr                  : string
+      Password              : option<string>
+      TOs                   : list<string>
+      CCs                   : list<string>
+      BCCs                  : list<string>
+      /// Mail body header.
+      Header                : option<string>
+      /// Mail body footer.
+      Footer                : option<string>
+    }
+
+  type Config =
+    {
+      ReportsDir            : string
+      /// 所属部署
+      Department            : option<string>
+      /// ユーザーの名前
+      UserName              : option<string>
+      /// メール送信時の設定
+      Mail                  : option<MailSettings>
+    }
+
+module DailyReports =
+  type ``作業項目`` =
+    {
+      ``案件``              : string
+      ``内容``              : string
+      ``工数``              : float
+      ``備考``              : option<string>
+    }
+
+  type ``作業実績`` =
+    list<``作業項目``>
+
+  type ``日報`` =
+    {
+      ``作業実績``          : ``作業実績``
+      ``翌営業日の予定``    : string
+      ``その他``            : option<string>
+      CCs                   : option<list<string>>
+    }
+
+module WeeklyReports =
+  /// Day of week in Kanji
+  type ``曜日`` = string
+
+  type ``担当者`` =
+    {
+      ``所属部署``          : string
+      ``名前``              : string
+    }
+
+  type ``日別`` =
+    DailyReports.``作業項目``
+
+  type ``日別の内容`` =
+    {
+      ``日``                : option<list<``日別``>>
+      ``月``                : option<list<``日別``>>
+      ``火``                : option<list<``日別``>>
+      ``水``                : option<list<``日別``>>
+      ``木``                : option<list<``日別``>>
+      ``金``                : option<list<``日別``>>
+      ``土``                : option<list<``日別``>>
+    }
+
+  type ``週報`` =
+    {
+      ``担当者``            : ``担当者``
+      ``今週の主な活動``    : string
+      ``進捗``              : string
+      ``日別の内容``        : ``日別の内容``
+      ``今週実績``          : string
+      ``来週予定``          : string
+      ``その他``            : string
+    }
+
+type ``日報`` = DailyReports.``日報``
+type ``週報`` = WeeklyReports.``週報``

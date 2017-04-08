@@ -64,6 +64,15 @@ module DateTime =
     let sunday = date |> theLatestSunday
     [|for i in 0..6 -> sunday.AddDays(float i)|]
 
+  let dates (firstDate: DateTime) (lastDate: DateTime) =
+    let rec loop date =
+      seq {
+        if date < lastDate then
+          yield date
+          yield! loop (date.AddDays(1.0))
+      }
+    loop firstDate.Date
+
 module Console =
   open System
   open Printf
@@ -78,12 +87,3 @@ module Console =
         -> true
       | _ -> loop ()
     loop ()
-
-  let runApp f =
-    try
-      f ()
-      0 // success
-    with
-    | e ->
-      eprintfn "ERROR! %s" e.Message
-      1 // error

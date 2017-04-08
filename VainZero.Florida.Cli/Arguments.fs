@@ -1,5 +1,6 @@
 ﻿namespace VainZero.Florida
 
+open System
 open Argu
 
 type DailyReportArguments =
@@ -47,3 +48,32 @@ with
         "日報の作業を行います。"
       | Weekly_Report _ ->
         "週報の作業を行います。"
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module Arguments =
+  let parser = ArgumentParser.Create<Arguments>()
+
+  let private usageCommand (parser: ArgumentParser<_>) =
+    Command.Usage (parser.PrintUsage())
+
+  let parse args =
+    let date = DateTime.Now
+    let parseResults = parser.ParseCommandLine(args, raiseOnUsage = false)
+    if parseResults.IsUsageRequested then
+      parseResults.Parser |> usageCommand
+    else
+      match parseResults.GetSubCommand() with
+      | Daily_Report parseResults ->
+        if parseResults.Contains(<@ DailyReportArguments.New @>) then
+          Command.DailyReportCreate date
+        else if parseResults.Contains(<@ DailyReportArguments.Mail @>) then
+          Command.DailyReportSendMail date
+        else
+          parseResults.Parser |> usageCommand
+      | Weekly_Report parseResults ->
+        if parseResults.Contains(<@ WeeklyReportArguments.New @>) then
+          Command.WeeklyReportCreate date
+        else if parseResults.Contains(<@ WeeklyReportArguments.Excel @>) then
+          Command.WeeklyReportConvertToExcel date
+        else
+          parseResults.Parser |> usageCommand

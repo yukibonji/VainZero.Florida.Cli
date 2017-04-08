@@ -2,31 +2,37 @@
 
 open System.IO
 open FsYaml
+open VainZero.Florida.UI.Notifications
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Config =
-  let empty =
+  let private empty =
     {
-      ReportsDir =
+      RootDirectory =
         "./"
       Department =
         None
       UserName =
         None
-      Mail =
+      DailyReportSubmitConfig =
         None
     }
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module App =
-  let configPath = @"florida-config.yaml"
+  let private configPath = @"florida-config.yaml"
 
-  let config =
+  let load (notifier: INotifier) =
     try
-      let yaml = File.ReadAllText(configPath)
-      in Yaml.load<Config> yaml
+      if File.Exists(configPath) |> not then
+        notifier.NotifyWarning("設定ファイルが見つかりません。空の設定ファイルを生成しました。アプリケーションは既定の設定で起動します。")
+        let yaml = empty |> Yaml.dump
+        File.WriteAllText(configPath, yaml)
+        empty
+      else
+        let yaml = File.ReadAllText(configPath)
+        Yaml.load<Config> yaml
     with
     | e ->
-        eprintfn "WARNING! The settings file is not found or invalid. Start with default settings. Error message is following:"
-        eprintfn "%s" e.Message
-        Config.empty
+      let message =
+        sprintf "設定ファイルの解析に失敗しました。既定の設定を使用してアプリケーションを起動します。エラーメッセージは以下の通りです:\r\n%s" e.Message
+      notifier.NotifyWarning(message)
+      empty

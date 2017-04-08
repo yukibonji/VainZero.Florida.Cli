@@ -1,49 +1,59 @@
-﻿namespace VainZero.Florida.Configurations
+﻿namespace VainZero.Florida
+  open System
+
+  type DateRange = DateTime * DateTime
+
+namespace VainZero.Florida.Configurations
+  open System
 
   /// 日報を送信するときの設定を表す。
   type DailyReportSubmitConfig =
     {
+      /// メールの送信元のホストサーバーを取得する。
       Host:
         string
-      /// Your short name is recommended.
-      Name:
+      /// メールの送信者の名前を取得する。
+      SenderName:
         string
-      Addr:
+      /// メールの送信者のメールアドレスを取得する。
+      SenderAddress:
         string
       Password:
         option<string>
-      TOs:
+      To:
         array<string>
-      CCs:
+      CC:
         array<string>
-      BCCs:
+      Bcc:
         array<string>
-      /// Mail body header.
       Header:
         option<string>
-      /// Mail body footer.
       Footer:
         option<string>
     }
 
   type Config =
     {
-      ReportsDir:
+      // 日報などを保存するディレクトリ―を取得する。
+      RootDirectory:
         string
-      /// 所属部署
+      /// 所属部署を取得する。
       Department:
         option<string>
-      /// ユーザーの名前
+      /// ユーザーの名前を取得する。
       UserName:
         option<string>
-      /// メール送信時の設定
-      Mail:
+      /// メール送信時の設定を取得する。
+      /// 省略された場合、メールは送信できない。
+      DailyReportSubmitConfig:
         option<DailyReportSubmitConfig>
     }
 
 namespace VainZero.Florida.Reports
+  open System
 
-  type ``作業項目`` =
+  /// 作業の記録を表す。
+  type Work =
     {
       ``案件``:
         string
@@ -55,22 +65,21 @@ namespace VainZero.Florida.Reports
         option<string>
     }
 
-  type ``作業実績`` =
-    array<``作業項目``>
-
-  type ``日報`` =
+  /// 日報を表す。
+  type DailyReport =
     {
       ``作業実績``:
-        ``作業実績``
+        array<Work>
       ``翌営業日の予定``:
         string
       ``その他``:
         option<string>
-      CCs:
+      CC:
         option<array<string>>
     }
 
-  type ``担当者`` =
+  /// 職員を表す。
+  type Staff =
     {
       ``所属部署``:
         string
@@ -78,30 +87,28 @@ namespace VainZero.Florida.Reports
         string
     }
 
-  type ``日別`` =
-    ``作業項目``
-
-  type ``日別の内容`` =
+  /// 日報を簡略化したものを表す。週報に埋め込まれる。
+  type SimplifiedDailyReport =
     {
-      ``日``                : option<array<``日別``>>
-      ``月``                : option<array<``日別``>>
-      ``火``                : option<array<``日別``>>
-      ``水``                : option<array<``日別``>>
-      ``木``                : option<array<``日別``>>
-      ``金``                : option<array<``日別``>>
-      ``土``                : option<array<``日別``>>
+      /// 作業日を取得する。
+      ``日付``:
+        DateTime
+      /// その日の作業内容のリストを取得する。備考は無視される。
+      ``作業実績``:
+        array<Work>
     }
 
-  type ``週報`` =
+  /// 週報を表す。
+  type WeeklyReport =
     {
       ``担当者``:
-        ``担当者``
+        Staff
       ``今週の主な活動``:
         string
       ``進捗``:
         string
       ``日別の内容``:
-        ``日別の内容``
+        array<SimplifiedDailyReport>
       ``今週実績``:
         string
       ``来週予定``:
@@ -112,21 +119,30 @@ namespace VainZero.Florida.Reports
 
 namespace VainZero.Florida.Data
   open System
+  open VainZero.Florida
   open VainZero.Florida.Reports
 
   type IKeyValueRepository<'key, 'value> =
+    abstract Open: 'key -> unit
     abstract FindAsync: 'key -> Async<option<'value>>
     abstract AddOrUpdateAsync: 'key * 'value -> Async<unit>
 
   type IDailyReportRepository =
-    inherit IKeyValueRepository<DateTime, ``日報``>
+    inherit IKeyValueRepository<DateTime, DailyReport>
+
+    /// 日報のうち日付が最小のものを取得する。
+    abstract FirstDateAsync: Async<option<DateTime>>
 
   type IWeeklyReportRepository =
-    inherit IKeyValueRepository<DateTime * DateTime, ``週報``>
+    inherit IKeyValueRepository<DateRange, WeeklyReport>
 
+    /// 指定された日付より前にある週報のうち最新のものの、日付の区間を取得する。
+    abstract LatestDateRangeAsync: DateTime -> Async<option<DateRange>>
+
+  /// エクセルファイルを格納するリポジトリーを表す。
+  /// エクセルファイルは XML 形式で保存される。
   type IWeeklyReportExcelRepository =
-    abstract Open: DateTime * DateTime -> unit
-    abstract AddOrUpdateAsync: DateTime * DateTime * ``週報`` -> Async<unit>
+    inherit IKeyValueRepository<DateRange, string>
 
   type IDataContext =
     inherit IDisposable
@@ -139,6 +155,7 @@ namespace VainZero.Florida.Data
     abstract Connect: unit -> IDataContext
 
 namespace VainZero.Florida.UI.Notifications
+
   type INotifier =
     abstract NotifyWarning: string -> unit
     abstract Confirm: string -> bool

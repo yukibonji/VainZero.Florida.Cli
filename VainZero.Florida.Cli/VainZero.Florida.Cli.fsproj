@@ -45,8 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="UI.Notifications.fs" />
     <Compile Include="Arguments.fs" />
+    <Compile Include="Command.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

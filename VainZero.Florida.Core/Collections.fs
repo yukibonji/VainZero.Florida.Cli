@@ -1,6 +1,24 @@
 ﻿namespace VainZero.Collections
 
 module Seq =
+  let tryMinBy (f: 'x -> 'y) (xs: seq<'x>) =
+    use e = xs.GetEnumerator()
+    if e.MoveNext() then
+      let mutable minX = e.Current
+      let mutable minY = f minX
+      while e.MoveNext() do
+        let x = e.Current
+        let y = f x
+        if y < minY then
+          minX <- x
+          minY <- y
+      Some minX
+    else
+      None
+
+  let tryMin (xs: seq<'x>) =
+    xs |> tryMinBy id
+
   let inline toCollection< ^t, ^x when ^t: (member Add: ^x -> unit) and ^t: (new: unit -> ^t)> xs =
     let c = new ^t()
     for x in xs do
@@ -34,5 +52,5 @@ module Map =
         match m |> Map.tryFind k with
         | None -> v
         | Some u -> f v u
-      in m |> Map.add k v'
+      m |> Map.add k v'
     r |> Map.fold combine l

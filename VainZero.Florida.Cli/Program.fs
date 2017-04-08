@@ -8,58 +8,38 @@ open Chessie.ErrorHandling
 open FsYaml
 open VainZero.Misc
 open VainZero.Florida.Configurations
+open VainZero.Florida.Data
 open VainZero.Florida.Reports
+open VainZero.Florida.UI.Notifications
 
 module Program =
-  let parser = ArgumentParser.Create<Arguments>()
-
-  let createWeeklyReport date =
-    let path = WeeklyReports.path date
-    if not (File.Exists(path))
-      || Console.readYesNo "Weekly report file already exists. Overwrite?"
-    then
-      DailyReports.generateWeeklyReports date
-      Process.Start(path) |> ignore
-
-  let convertWeeklyReportToExcel date =
-    WeeklyReports.generateExcel date
-    Process.Start("excel", WeeklyReports.excelPath date) |> ignore
-
-  let printUsage (parser: ArgumentParser<_>) =
-    printfn "USAGE: %s" (parser.PrintUsage())
-
-  let procCommandLine args =
-    let now = DateTime.Now
-    let parseResults = parser.ParseCommandLine(args, raiseOnUsage = false)
-    if parseResults.IsUsageRequested then
-      parseResults.Parser |> printUsage
-    else
-      match parseResults.GetSubCommand() with
-      | Daily_Report parseResults ->
-        if parseResults.Contains(<@ DailyReportArguments.New @>) then
-          () // TODO: implement
-        else if parseResults.Contains(<@ DailyReportArguments.Mail @>) then
-          DailyReports.sendMail now
-        else
-          parseResults.Parser |> printUsage
-      | Weekly_Report parseResults ->
-        if parseResults.Contains(<@ WeeklyReportArguments.New @>) then
-          createWeeklyReport now
-        else if parseResults.Contains(<@ WeeklyReportArguments.Excel @>) then
-          convertWeeklyReportToExcel now
-        else
-          parseResults.Parser |> printUsage
-
-  let run args =
+  let createCommand args =
     if args |> Array.isEmpty then
-      parser |> printUsage
+      Arguments.parser.PrintUsage() |> Command.printUsage
       printfn "コマンドライン引数を入力してください:"
       match Console.ReadLine() with
-      | null -> ()
-      | line -> procCommandLine (line |> String.splitBySpaces)
+      | null ->
+        Command.Empty
+      | line ->
+        Arguments.parse (line |> String.splitBySpaces)
     else
-      procCommandLine args
+      Arguments.parse args
+
+  let runAsync args =
+    async {
+      let command = createCommand args
+      let notifier = ConsoleNotifier() :> INotifier
+      let config = Config.load notifier
+      let database = FileSystemDatabase(DirectoryInfo(config.RootDirectory)) :> IDatabase
+      use dataContext = database.Connect()
+      return! Command.executeAsync config notifier dataContext command
+    }
 
   [<EntryPoint>]
   let main args =
-    Console.runApp (fun () -> run args)
+    match runAsync args |> Async.RunSynchronously with
+    | Ok ((), _) ->
+      0 // success
+    | Bad errors ->
+      eprintfn "ERROR! %s" (errors |> String.concatWithLineBreak)
+      1 // error

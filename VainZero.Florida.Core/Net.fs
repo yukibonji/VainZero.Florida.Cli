@@ -2,50 +2,56 @@
 
 open VainZero.Misc
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module MailAddress =
   open System
   open System.Net
   open System.Net.Mail
 
-  let ofString (s: string) =
-    new MailAddress(s)
+  let ofString (address: string) =
+    MailAddress(address)
 
-  let displayName (addr: MailAddress) =
-    addr.DisplayName
+  let displayName (address: MailAddress) =
+    address.DisplayName
 
-  /// Returns a string in the format of "display-name <mail-address>".
-  let nameAddr (addr: MailAddress) =
-    if String.IsNullOrWhiteSpace(addr |> displayName)
-    then ""
-    else addr.DisplayName + " "
-    + sprintf "<%s>" addr.Address
+  /// Creates a string in the format of "display-name <mail-address>".
+  let nameAddress (address: MailAddress) =
+    let namePart =
+      if String.IsNullOrWhiteSpace(address |> displayName)
+      then ""
+      else address.DisplayName + " "
+    let addressPart =
+      sprintf "<%s>" address.Address
+    namePart + addressPart
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module MailAddressCollection =
   open System.Net.Mail
 
-  let addRange (xs: seq<MailAddress>) (self: MailAddressCollection) =
+  let addRange (xs: seq<MailAddress>) (collection: MailAddressCollection) =
     for x in xs do
-      self.Add(x)
+      collection.Add(x)
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module SmtpClient =
   open System
   open System.Net
   open System.Net.Mail
 
   let create (host: string) (userName: string) (password: string) =
-    new SmtpClient(Host = host) |> tap (fun self ->
-      self.Credentials <-
-        new NetworkCredential(userName, password)
+    new SmtpClient
+      ( Host = host
+      , Credentials = NetworkCredential(userName, password)
       )
 
-  let send sender tos ccs bccs subject body (self: SmtpClient) =
-    let msg =
-      new MailMessage() |> tap (fun msg ->
-        msg.Subject     <- subject
-        msg.Body        <- body
-        msg.From        <- sender
-        msg.To    |> MailAddressCollection.addRange tos
-        msg.CC    |> MailAddressCollection.addRange ccs
-        msg.Bcc   |> MailAddressCollection.addRange bccs
+  let send sender (tos, ccs, bccs) subject body (client: SmtpClient) =
+    use message =
+      new MailMessage
+        ( Subject = subject
+        , Body = body
+        , From = sender
         )
-    in self.Send(msg)
+    message.To |> MailAddressCollection.addRange tos
+    message.CC |> MailAddressCollection.addRange ccs
+    message.Bcc |> MailAddressCollection.addRange bccs
+    client.Send(message)

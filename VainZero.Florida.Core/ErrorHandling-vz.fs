@@ -75,19 +75,3 @@ module Trial =
     | Fail msgs ->
         f msgs
         None
-
-  let inline runConsoleApp (result: Result<unit, 'x>): int =
-    let printMessages msgs =
-      for msg in msgs do
-        eprintfn "%s" (string msg)
-    match result with
-    | Pass () ->
-        0
-    | Warn ((), msgs) ->
-        eprintfn "WARNING"
-        printMessages msgs
-        0
-    | Fail msgs ->
-        eprintfn "ERROR"
-        printMessages msgs
-        1

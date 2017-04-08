@@ -1,16 +1,5 @@
 ﻿namespace VainZero.ErrorHandling
 
-module Option =
-  let getOr x =
-    function
-    | Some x -> x
-    | None -> x
-
-  let getOrElse f =
-    function
-    | Some x -> x
-    | None -> f ()
-
 module Trial =
   open System
   open Chessie.ErrorHandling

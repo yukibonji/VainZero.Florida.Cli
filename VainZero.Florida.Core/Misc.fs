@@ -9,6 +9,17 @@ module Operators =
   let fold (xs: seq<'x>) (f: 'x -> 's -> 's) (s: 's): 's =
     xs |> Seq.fold (fun s x -> f x s) s
 
+module Option =
+  let getOr x =
+    function
+    | Some x -> x
+    | None -> x
+
+  let getOrElse f =
+    function
+    | Some x -> x
+    | None -> f ()
+
 module String =
   open System
 

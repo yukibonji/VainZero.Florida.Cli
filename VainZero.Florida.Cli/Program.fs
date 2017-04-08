@@ -1,14 +1,18 @@
-﻿namespace VainZero.Florida.Reports
+﻿namespace VainZero.Florida
 
 open System
 open System.Diagnostics
 open System.IO
+open Argu
 open Chessie.ErrorHandling
 open FsYaml
 open VainZero.Misc
 open VainZero.Florida.Configurations
+open VainZero.Florida.Reports
 
 module Program =
+  let parser = ArgumentParser.Create<Arguments>()
+
   let createWeeklyReport date =
     let path = WeeklyReports.path date
     if not (File.Exists(path))
@@ -21,31 +25,40 @@ module Program =
     WeeklyReports.generateExcel date
     Process.Start("excel", WeeklyReports.excelPath date) |> ignore
 
+  let printUsage (parser: ArgumentParser<_>) =
+    printfn "USAGE: %s" (parser.PrintUsage())
+
   let procCommandLine args =
-    match args with
-    | "wr" :: dateStr :: _ ->
-        createWeeklyReport (dateStr |> DateTime.Parse)
-    | "wr" :: _ ->
-        createWeeklyReport DateTime.Now
-    | "excel" :: dateStr :: _ ->
-        convertWeeklyReportToExcel (dateStr |> DateTime.Parse)
-    | "excel" :: _ ->
-        convertWeeklyReportToExcel DateTime.Now
-    | "mail" :: dateStr :: _ ->
-        DailyReports.sendMail (dateStr |> DateTime.Parse)
-    | "mail" :: _ ->
-        DailyReports.sendMail DateTime.Now
-    | _ ->
-        failwithf "Unknown commands: %s" (args |> String.concat " ")
+    let now = DateTime.Now
+    let parseResults = parser.ParseCommandLine(args, raiseOnUsage = false)
+    if parseResults.IsUsageRequested then
+      parseResults.Parser |> printUsage
+    else
+      match parseResults.GetSubCommand() with
+      | Daily_Report parseResults ->
+        if parseResults.Contains(<@ DailyReportArguments.New @>) then
+          () // TODO: implement
+        else if parseResults.Contains(<@ DailyReportArguments.Mail @>) then
+          DailyReports.sendMail now
+        else
+          parseResults.Parser |> printUsage
+      | Weekly_Report parseResults ->
+        if parseResults.Contains(<@ WeeklyReportArguments.New @>) then
+          createWeeklyReport now
+        else if parseResults.Contains(<@ WeeklyReportArguments.Excel @>) then
+          convertWeeklyReportToExcel now
+        else
+          parseResults.Parser |> printUsage
 
   let run args =
     if args |> Array.isEmpty then
-      printfn "Input command line:"
+      parser |> printUsage
+      printfn "コマンドライン引数を入力してください:"
       match Console.ReadLine() with
       | null -> ()
-      | line -> procCommandLine (line |> String.splitBySpaces |> Array.toList)
+      | line -> procCommandLine (line |> String.splitBySpaces)
     else
-      procCommandLine (args |> Array.toList)
+      procCommandLine args
 
   [<EntryPoint>]
   let main args =

@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="UI.Notifications.fs" />
+    <Compile Include="Arguments.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

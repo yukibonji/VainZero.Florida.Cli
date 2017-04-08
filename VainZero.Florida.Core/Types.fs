@@ -128,7 +128,9 @@ namespace VainZero.Florida.Data
     abstract AddOrUpdateAsync: 'key * 'value -> Async<unit>
 
   type IDailyReportRepository =
-    inherit IKeyValueRepository<DateTime, DailyReport>
+    abstract Open: DateTime -> unit
+    abstract FindAsync: DateTime -> Async<option<DailyReport>>
+    abstract AddOrUpdateAsync: DateTime * DailyReport -> Async<unit>
 
     /// 日報のうち日付が最小のものを取得する。
     abstract FirstDateAsync: Async<option<DateTime>>

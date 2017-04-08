@@ -35,7 +35,7 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
 
   do subdirectory |> DirectoryInfo.createUnlessExists
 
-  interface IKeyValueRepository<DateTime, DailyReport> with
+  interface IDailyReportRepository with
     override this.Open(date) =
       Process.openFile (filePath date) |> ignore
 
@@ -56,7 +56,6 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
         return! File.writeAllTextAsync yaml (filePath date)
       }
 
-  interface IDailyReportRepository with
     override this.FirstDateAsync =
       async {
         return

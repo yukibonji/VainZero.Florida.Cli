@@ -5,7 +5,6 @@ open System.IO
 open System.Net.Mail
 open Chessie.ErrorHandling
 open VainZero.Collections
-open VainZero.ErrorHandling
 open VainZero.Misc
 open VainZero.Net
 open VainZero.Text

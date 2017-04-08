@@ -5,7 +5,6 @@ open System.IO
 open Chessie.ErrorHandling
 open FsYaml
 open VainZero.Collections
-open VainZero.ErrorHandling
 open VainZero.Misc
 open VainZero.Text
 open VainZero.Florida.Configurations

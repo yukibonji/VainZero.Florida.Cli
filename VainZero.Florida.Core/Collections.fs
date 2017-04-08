@@ -19,12 +19,6 @@ module Seq =
   let tryMin (xs: seq<'x>) =
     xs |> tryMinBy id
 
-  let inline toCollection< ^t, ^x when ^t: (member Add: ^x -> unit) and ^t: (new: unit -> ^t)> xs =
-    let c = new ^t()
-    for x in xs do
-      (^t: (member Add: ^x -> unit) (c, x))
-    c
-
 module Array =
   open System.Collections.Generic
 

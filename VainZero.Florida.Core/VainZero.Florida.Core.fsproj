@@ -50,7 +50,6 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Misc.fs" />
     <Compile Include="Collections.fs" />
-    <Compile Include="ErrorHandling-vz.fs" />
     <Compile Include="IO.FileSystem.fs" />
     <Compile Include="Net.fs" />
     <Compile Include="Text.fs" />

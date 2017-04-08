@@ -32,8 +32,7 @@ module DailyReports =
       sprintf "[日報] %d/%d %s" date.Month date.Day submitConfig.SenderName
 
     /// メールの文面を作成する。
-    let content (submitConfig: DailyReportSubmitConfig) report =
-      let yaml = report |> Yaml.dump
+    let content (submitConfig: DailyReportSubmitConfig) yaml =
       [|
         submitConfig.Header
         Some yaml
@@ -77,10 +76,10 @@ module DailyReports =
         let! report = (dataContext: IDataContext).DailyReports.FindAsync(date)
         let submitConfig = config.DailyReportSubmitConfig
         match (report, submitConfig) with
-        | (Some report, Some submitConfig) ->
+        | (Some (yaml, report), Some submitConfig) ->
           let destinations = destinations submitConfig report
           let subject = subject submitConfig date
-          let content = content submitConfig report
+          let content = content submitConfig yaml
           let confirmationMessage = confirmationMessage destinations content
           if (notifier: INotifier).Confirm(confirmationMessage) then
             let password = password submitConfig

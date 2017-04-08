@@ -44,7 +44,7 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
         try
           let! yaml = File.readAllTextAsync (filePath date)
           let report = Yaml.load<DailyReport> yaml
-          return Some report
+          return Some (yaml, report)
         with
         | _ ->
           return None

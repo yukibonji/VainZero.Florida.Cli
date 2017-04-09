@@ -5,6 +5,7 @@ Department: 営業部
 
 # 週報の設定
 WeeklyReportConfig:
+  # 週例会議の曜日
   MeetingDay: Thursday
 
 # 日報を送信するときの設定

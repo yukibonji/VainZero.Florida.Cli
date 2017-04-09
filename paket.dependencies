@@ -1,1 +1,15 @@
 source https://www.nuget.org/api/v2
+
+github fsprojects/Chessie src/Chessie/ErrorHandling.fs
+nuget VainZero.FsYaml ~> 2.0
+
+group Cli
+    source https://www.nuget.org/api/v2
+
+    nuget Argu ~> 3.0
+
+group UnitTest
+    source https://www.nuget.org/api/v2
+
+    nuget Persimmon ~> 1.0
+    nuget Persimmon.Console ~> 1.0

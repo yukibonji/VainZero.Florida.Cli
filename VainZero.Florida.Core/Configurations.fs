@@ -22,17 +22,11 @@ module Config =
 
   let load (notifier: INotifier) =
     try
-      if File.Exists(configPath) |> not then
-        notifier.NotifyWarning("設定ファイルが見つかりません。空の設定ファイルを生成しました。アプリケーションは既定の設定で起動します。")
-        let yaml = empty |> Yaml.dump
-        File.WriteAllText(configPath, yaml)
-        empty
-      else
-        let yaml = File.ReadAllText(configPath)
-        Yaml.load<Config> yaml
+      let yaml = File.ReadAllText(configPath)
+      Yaml.load<Config> yaml
     with
     | e ->
       let message =
-        sprintf "設定ファイルの解析に失敗しました。既定の設定を使用してアプリケーションを起動します。エラーメッセージは以下の通りです:\r\n%s" e.Message
+        sprintf "設定ファイルが見つからないか、解析に失敗しました。既定の設定を使用してアプリケーションを起動します。エラーメッセージは以下の通りです:\r\n%s" e.Message
       notifier.NotifyWarning(message)
       empty

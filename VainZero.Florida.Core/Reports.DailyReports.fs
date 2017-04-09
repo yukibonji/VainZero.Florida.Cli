@@ -13,6 +13,19 @@ open VainZero.Florida.Configurations
 open VainZero.Florida.Data
 open VainZero.Florida.UI.Notifications
 
+module Work =
+  let create project content duration note =
+    {
+      案件 =
+        project
+      内容 =
+        content
+      工数 =
+        duration
+      備考 =
+        note
+    }
+
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module DailyReports =
   module internal Submit =

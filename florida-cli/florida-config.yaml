@@ -1,0 +1,36 @@
+RootDirectory: data
+
+UserName: 無名太郎
+Department: 営業部
+
+# 日報を送信するときの設定
+DailyReportSubmitConfig:
+  Some:
+    # メールの送信元のホストサーバー
+    Host: example.com
+
+    # メールの送信者の名前
+    SenderName: 無名
+
+    SenderAddress: muna-tarou@example.com
+
+    # メールを送信するための認証に使うパスワード。
+    # 省略した場合は、送信時に入力を求められることがあります。
+    # Password: hogehoge
+
+    To:
+      - to-address@example.com
+
+    CC:
+      - first-cc-address@example.com
+      - second-cc-address@example.com
+
+    Bcc:
+      - muna-tarou@example.com
+
+    Header: ''
+
+    Footer: |
+      ------------
+      |  Footer  |
+      ------------

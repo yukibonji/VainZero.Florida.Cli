@@ -130,7 +130,6 @@ namespace VainZero.Florida.Data
   type IDailyReportRepository =
     abstract Open: DateTime -> unit
     abstract FindAsync: DateTime -> Async<option<string * DailyReport>>
-    abstract AddOrUpdateAsync: DateTime * DailyReport -> Async<unit>
 
     /// 日報のうち日付が最小のものを取得する。
     abstract FirstDateAsync: Async<option<DateTime>>

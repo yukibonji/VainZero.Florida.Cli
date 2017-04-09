@@ -12,6 +12,24 @@ open VainZero.Florida.Data
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module WeeklyReports =
+  let empty staff =
+    {
+      担当者 =
+        staff
+      今週の主な活動 =
+        ""
+      進捗 =
+        ""
+      日別の内容 =
+        [||]
+      今週実績 =
+        ""
+      来週予定 =
+        ""
+      その他 =
+        ""
+    }
+
   /// 指定された日付に生成すべき週報の対象となる日付の区間を取得する。
   let dateRangeFromDateAsync (context: IDataContext) date =
     async {
@@ -119,18 +137,16 @@ module WeeklyReports =
         let staff = staff config
         let (activityNames, activityNotes) = dailyReports |> activities
         return
-          {
-            担当者 = staff
-            今週の主な活動 =
-              activityNames |> String.concatWithLineBreak
-            進捗 =
-              progressList activityNames
-            日別の内容 =
-              simplifiedDailyReports dailyReports
-            今週実績 =
-              weeklyActivity activityNames activityNotes
-            来週予定 = ""
-            その他 = ""
+          { empty staff with
+              担当者 = staff
+              今週の主な活動 =
+                activityNames |> String.concatWithLineBreak
+              進捗 =
+                progressList activityNames
+              日別の内容 =
+                simplifiedDailyReports dailyReports
+              今週実績 =
+                weeklyActivity activityNames activityNotes
           }
       }
 

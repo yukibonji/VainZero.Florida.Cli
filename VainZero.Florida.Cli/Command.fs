@@ -20,10 +20,10 @@ module Command =
       | Command.DailyReportCreate _ ->
         return! NotImplementedException() |> raise
       | Command.DailyReportSendMail date ->
-        return! DailyReports.submitAsync config notifier dataContext date
+        return! DailyReport.submitAsync config notifier dataContext date
       | Command.WeeklyReportCreate date ->
-        do! WeeklyReports.generateAsync config dataContext date
+        do! WeeklyReport.generateAsync config dataContext date
         return ok ()
       | Command.WeeklyReportConvertToExcel date ->
-        return! WeeklyReports.convertToExcelAsync dataContext date
+        return! WeeklyReport.convertToExcelAsync dataContext date
     }

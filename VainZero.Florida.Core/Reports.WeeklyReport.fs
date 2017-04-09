@@ -11,7 +11,7 @@ open VainZero.Florida.Configurations
 open VainZero.Florida.Data
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module WeeklyReports =
+module WeeklyReport =
   let empty staff =
     {
       担当者 =

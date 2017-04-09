@@ -13,6 +13,7 @@ open VainZero.Florida.Configurations
 open VainZero.Florida.Data
 open VainZero.Florida.UI.Notifications
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Work =
   let create project content duration note =
     {
@@ -27,7 +28,7 @@ module Work =
     }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module DailyReports =
+module DailyReport =
   let create works plan note =
     {
       作業実績 =

@@ -57,8 +57,8 @@
     <Compile Include="Types.fs" />
     <Compile Include="Configurations.fs" />
     <Compile Include="Reports.XmlTemplate.fs" />
-    <Compile Include="Reports.DailyReports.fs" />
-    <Compile Include="Reports.WeeklyReports.fs" />
+    <Compile Include="Reports.DailyReport.fs" />
+    <Compile Include="Reports.WeeklyReport.fs" />
     <Compile Include="Data.FileSystemDatabase.fs" />
     <Compile Include="Data.MemoryDatabase.fs" />
   </ItemGroup>

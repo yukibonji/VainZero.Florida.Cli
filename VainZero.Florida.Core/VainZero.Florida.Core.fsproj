@@ -60,6 +60,7 @@
     <Compile Include="Reports.DailyReports.fs" />
     <Compile Include="Reports.WeeklyReports.fs" />
     <Compile Include="Data.FileSystemDatabase.fs" />
+    <Compile Include="Data.MemoryDatabase.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

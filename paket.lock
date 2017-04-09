@@ -1,7 +1,7 @@
 NUGET
   remote: https://www.nuget.org/api/v2
     FSharp.Configuration (0.6.4)
-    VainZero.FsYaml (2.3.3)
+    VainZero.FsYaml (2.4)
       FSharp.Configuration (0.6.4)
       YamlDotNet (>= 4.1 < 5.0)
     YamlDotNet (4.1)

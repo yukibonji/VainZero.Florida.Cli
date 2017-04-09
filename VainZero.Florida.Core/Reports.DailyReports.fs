@@ -28,6 +28,18 @@ module Work =
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module DailyReports =
+  let create works plan note =
+    {
+      作業実績 =
+        works
+      翌営業日の予定 =
+        plan
+      その他 =
+        note
+      CC =
+        None
+    }
+
   module internal Submit =
     let destinations (submitConfig: DailyReportSubmitConfig) (report: DailyReport) =
       let tos =

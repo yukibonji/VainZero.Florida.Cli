@@ -66,22 +66,22 @@ module WeeklyReport =
     /// 日報に含まれる作業の名前のリストと、作業の名前から備考への辞書を生成する。
     /// 同内容の作業が複数の日報に渡っている場合は、1つにまとめる。
     let activities reports =
-        reports
-        |> Array.collect (fun (_, report: DailyReport) -> report.作業実績)
-        |> Array.map
-          (fun work ->
-            let title = sprintf "%s/%s" work.案件 work.内容
-            (title, (title, work.備考))
+      reports
+      |> Array.collect (fun (_, report: DailyReport) -> report.作業実績)
+      |> Array.map
+        (fun work ->
+          let title = sprintf "%s/%s" work.案件 work.内容
+          (title, (title, work.備考))
+        )
+      |> Array.unzip
+      |> fun (activityNames, activityNoteList) ->
+          ( activityNames |> Array.unique
+          , activityNoteList
+            |> Seq.choose
+              (fun (title, note) -> note |> Option.map (fun note -> (title, note)))
+            |> Seq.bundle id (fun l r -> l + Environment.NewLine + r)
+            |> Map.ofSeq
           )
-        |> Array.unzip
-        |> fun (activityNames, activityNoteList) ->
-            ( activityNames |> Array.unique
-            , activityNoteList
-              |> Seq.choose
-                (fun (title, note) -> note |> Option.map (fun note -> (title, note)))
-              |> Seq.bundle id (fun l r -> l + Environment.NewLine + r)
-              |> Map.ofSeq
-            )
 
     /// 作業項目のリストから進捗リストの雛形を生成する。
     let progressList activityNames =

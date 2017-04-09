@@ -122,11 +122,6 @@ namespace VainZero.Florida.Data
   open VainZero.Florida
   open VainZero.Florida.Reports
 
-  type IKeyValueRepository<'key, 'value> =
-    abstract Open: 'key -> unit
-    abstract FindAsync: 'key -> Async<option<'value>>
-    abstract AddOrUpdateAsync: 'key * 'value -> Async<unit>
-
   type IDailyReportRepository =
     abstract Open: DateTime -> unit
     abstract FindAsync: DateTime -> Async<option<string * DailyReport>>
@@ -135,7 +130,9 @@ namespace VainZero.Florida.Data
     abstract FirstDateAsync: Async<option<DateTime>>
 
   type IWeeklyReportRepository =
-    inherit IKeyValueRepository<DateRange, WeeklyReport>
+    abstract Open: DateRange -> unit
+    abstract FindAsync: DateRange -> Async<option<WeeklyReport>>
+    abstract AddOrUpdateAsync: DateRange * WeeklyReport -> Async<unit>
 
     /// 指定された日付より前にある週報のうち最新のものの、日付の区間を取得する。
     abstract LatestDateRangeAsync: DateTime -> Async<option<DateRange>>
@@ -143,7 +140,8 @@ namespace VainZero.Florida.Data
   /// エクセルファイルを格納するリポジトリーを表す。
   /// エクセルファイルは XML 形式で保存される。
   type IWeeklyReportExcelRepository =
-    inherit IKeyValueRepository<DateRange, string>
+    abstract Open: DateRange -> unit
+    abstract AddOrUpdateAsync: DateRange * string -> Async<unit>
 
   type IDataContext =
     inherit IDisposable

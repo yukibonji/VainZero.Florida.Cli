@@ -83,7 +83,7 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
 
   do subdirectory |> DirectoryInfo.createUnlessExists
 
-  interface IKeyValueRepository<DateRange, WeeklyReport> with
+  interface IWeeklyReportRepository with
     override this.Open(dateRange) =
       Process.openFile (filePath dateRange) |> ignore
 
@@ -104,7 +104,6 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
         return! File.writeAllTextAsync yaml (filePath dateRange)
       }
 
-  interface IWeeklyReportRepository with
     override this.LatestDateRangeAsync(date) =
       async {
         // 日付の区間の終点が「指定された日付の i 日前」である週報を検索する。
@@ -144,17 +143,12 @@ type FileSystemWeeklyReportExcelRepository(root: DirectoryInfo) =
 
   do subdirectory |> DirectoryInfo.createUnlessExists
 
-  interface IKeyValueRepository<DateRange, string> with
+  interface IWeeklyReportExcelRepository with
     override this.Open(dateRange) =
       Process.Start("excel", filePath dateRange) |> ignore
 
-    override this.FindAsync(dateRange) =
-      NotImplementedException() |> raise
-
     override this.AddOrUpdateAsync(dateRange, xml) =
       File.writeAllTextAsync xml (filePath dateRange)
-
-  interface IWeeklyReportExcelRepository
 
 type FileSystemDataContext(root: DirectoryInfo) =
   interface IDisposable with

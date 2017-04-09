@@ -42,12 +42,16 @@ module Program =
 
   let runAsync args =
     async {
-      let notifier = ConsoleNotifier() :> INotifier
-      let config = Config.load notifier
-      let database = FileSystemDatabase(DirectoryInfo(config.RootDirectory)) :> IDatabase
-      use dataContext = database.Connect()
-      let! command = createCommandAsync config dataContext args
-      return! Command.executeAsync config notifier dataContext command
+      try
+        let notifier = ConsoleNotifier() :> INotifier
+        let config = Config.load notifier
+        let database = FileSystemDatabase(DirectoryInfo(config.RootDirectory)) :> IDatabase
+        use dataContext = database.Connect()
+        let! command = createCommandAsync config dataContext args
+        return! Command.executeAsync config notifier dataContext command
+      with
+      | e ->
+        return e |> string |> fail
     }
 
   [<EntryPoint>]

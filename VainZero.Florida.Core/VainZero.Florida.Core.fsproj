@@ -31,7 +31,8 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\VainZero.Florida.Core.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -48,6 +49,20 @@
       <Link>ErrorHandling.fs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="FsYaml.fs" />
+    <Compile Include="Misc.fs" />
+    <Compile Include="Collections.fs" />
+    <Compile Include="IO.FileSystem.fs" />
+    <Compile Include="Net.fs" />
+    <Compile Include="Text.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Configurations.fs" />
+    <Compile Include="Reports.XmlTemplate.fs" />
+    <Compile Include="Reports.Work.fs" />
+    <Compile Include="Reports.DailyReport.fs" />
+    <Compile Include="Reports.WeeklyReport.fs" />
+    <Compile Include="Data.FileSystemDatabase.fs" />
+    <Compile Include="Data.MemoryDatabase.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -1,6 +1,8 @@
 ﻿namespace VainZero.Collections
 
 module Seq =
+  open System.Collections.Generic
+
   let tryMinBy (f: 'x -> 'y) (xs: seq<'x>) =
     use e = xs.GetEnumerator()
     if e.MoveNext() then
@@ -19,6 +21,20 @@ module Seq =
   let tryMin (xs: seq<'x>) =
     xs |> tryMinBy id
 
+  let bundle (inject: 'v -> 'w) (append: 'w -> 'v -> 'w) (kvs: seq<'k * 'v>) =
+    let list = ResizeArray<'k * 'w>()
+    let dictionary = Dictionary<'k, int>()
+    for (k, v) in kvs do
+      match dictionary.TryGetValue(k) with
+      | (true, index) ->
+        let w = list.[index] |> snd
+        list.[index] <- (k, append w v)
+      | (false, _) ->
+        let index = list.Count
+        list.Add(k, inject v)
+        dictionary.Add(k, index)
+    list.ToArray()
+
 module Array =
   open System.Collections.Generic
 
@@ -35,16 +51,3 @@ module Array =
       if set.Add(x) then
         ys.Add(x)
     ys |> Seq.toArray
-
-module Map =
-  let singleton k v =
-    Map.empty |> Map.add k v
-
-  let appendWith f l r =
-    let combine m k v =
-      let v' =
-        match m |> Map.tryFind k with
-        | None -> v
-        | Some u -> f v u
-      m |> Map.add k v'
-    r |> Map.fold combine l

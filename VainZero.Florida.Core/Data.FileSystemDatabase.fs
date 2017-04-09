@@ -51,7 +51,7 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
       async {
         try
           let! yaml = File.readAllTextAsync (filePath date)
-          let report = Yaml.load<DailyReport> yaml
+          let report = Yaml.myLoad<DailyReport> yaml
           return Some (yaml, report)
         with
         | _ ->
@@ -99,7 +99,7 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
       async {
         try
           let! yaml = File.readAllTextAsync (filePath dateRange)
-          let report = Yaml.load<WeeklyReport> yaml
+          let report = Yaml.myLoad<WeeklyReport> yaml
           return Some report
         with
         | _ ->

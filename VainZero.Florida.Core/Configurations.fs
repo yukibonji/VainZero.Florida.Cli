@@ -23,7 +23,7 @@ module Config =
   let load (notifier: INotifier) =
     try
       let yaml = File.ReadAllText(configPath)
-      Yaml.load<Config> yaml
+      Yaml.myLoad<Config> yaml
     with
     | e ->
       let message =

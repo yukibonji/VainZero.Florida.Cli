@@ -17,8 +17,9 @@ module Command =
       | Command.Usage usage ->
         printUsage usage
         return ok ()
-      | Command.DailyReportCreate _ ->
-        return! NotImplementedException() |> raise
+      | Command.DailyReportCreate date ->
+        do! DailyReport.scaffoldAsync dataContext date
+        return ok ()
       | Command.DailyReportSendMail date ->
         return! DailyReport.submitAsync config notifier dataContext date
       | Command.WeeklyReportCreate date ->

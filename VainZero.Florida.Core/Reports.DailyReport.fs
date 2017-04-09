@@ -30,6 +30,13 @@ module DailyReport =
   let empty =
     create [||] "" None
 
+  /// 指定された日付の日報の雛形を生成して、開く。
+  let scaffoldAsync (dataContext: IDataContext) date =
+    async {
+      do! dataContext.DailyReports.ScaffoldAsync(date)
+      dataContext.DailyReports.Open(date)
+    }
+
   module internal Submit =
     let destinations (submitConfig: DailyReportSubmitConfig) (report: DailyReport) =
       let tos =

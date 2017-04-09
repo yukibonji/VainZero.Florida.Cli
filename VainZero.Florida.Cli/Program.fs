@@ -60,5 +60,7 @@ module Program =
     | Ok ((), _) ->
       0 // success
     | Bad errors ->
-      eprintfn "ERROR! %s" (errors |> String.concatWithLineBreak)
+      eprintfn "ERROR:"
+      for error in errors do
+        eprintfn "%s" error
       1 // error

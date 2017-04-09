@@ -2,8 +2,7 @@
 Florida とは、日報/週報の作成を手助けするツール。
 
 ## 導入
-### 設定ファイル
-0. ダウンロードしてきたファイルをどこかに展開する。
+0. [最新版](https://github.com/vain0/VainZero.Florida.Cli/releases/latest) をダウンロードする。
 1. 設定ファイル ``florida-config.yaml`` を編集する。
     - 詳細は当該ファイルを参照。
 

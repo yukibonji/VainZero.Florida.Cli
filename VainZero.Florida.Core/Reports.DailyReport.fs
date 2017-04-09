@@ -27,6 +27,9 @@ module DailyReport =
         None
     }
 
+  let empty =
+    create [||] "" None
+
   module internal Submit =
     let destinations (submitConfig: DailyReportSubmitConfig) (report: DailyReport) =
       let tos =

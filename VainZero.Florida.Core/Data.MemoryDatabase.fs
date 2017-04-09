@@ -15,6 +15,13 @@ type MemoryDailyReportRepository() =
     override this.Open(_) =
       ()
 
+    override this.ScaffoldAsync(date) =
+      async {
+        let dailyReport = DailyReport.empty
+        let yaml = Yaml.myDump dailyReport
+        dictionary.[date] <- (yaml, dailyReport)
+      }
+
     override this.FindAsync(date) =
       async {
         match dictionary.TryGetValue(date) with

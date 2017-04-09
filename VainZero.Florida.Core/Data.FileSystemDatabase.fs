@@ -33,11 +33,19 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
     with
     | _ -> None
 
+  let templateFile =
+    FileInfo(Path.Combine(subdirectory.FullName, "template.yaml"))
+
   do subdirectory |> DirectoryInfo.createUnlessExists
 
   interface IDailyReportRepository with
     override this.Open(date) =
       Process.openFile (filePath date) |> ignore
+
+    override this.ScaffoldAsync(date) =
+      async {
+        File.Copy(templateFile.FullName, filePath date, overwrite = true)
+      }
 
     override this.FindAsync(date) =
       async {

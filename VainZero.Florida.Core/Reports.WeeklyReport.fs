@@ -71,7 +71,7 @@ module WeeklyReport =
         |> Array.collect (fun (_, report: DailyReport) -> report.作業実績)
         |> Array.map
           (fun work ->
-            let title = sprintf "%s/%s" (work.案件) (work.内容)
+            let title = sprintf "%s/%s" work.案件 work.内容
             (title, (title, work.備考))
           )
         |> Array.unzip

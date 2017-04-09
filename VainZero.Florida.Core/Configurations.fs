@@ -9,7 +9,7 @@ module Config =
   let private empty =
     {
       RootDirectory =
-        "./"
+        "data"
       Department =
         None
       UserName =

@@ -32,6 +32,13 @@ namespace VainZero.Florida.Configurations
         option<string>
     }
 
+  /// 週報の設定を表す。
+  type WeeklyReportConfig =
+    {
+      /// 週例会議が開催される曜日を取得する。
+      MeetingDay: DayOfWeek
+    }
+
   type Config =
     {
       // 日報などを保存するディレクトリ―を取得する。
@@ -43,6 +50,9 @@ namespace VainZero.Florida.Configurations
       /// ユーザーの名前を取得する。
       UserName:
         option<string>
+      /// 週報の設定を取得する。
+      WeeklyReportConfig:
+        WeeklyReportConfig
       /// メール送信時の設定を取得する。
       /// 省略された場合、メールは送信できない。
       DailyReportSubmitConfig:

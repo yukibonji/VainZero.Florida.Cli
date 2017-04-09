@@ -3,6 +3,10 @@ RootDirectory: data
 UserName: 無名太郎
 Department: 営業部
 
+# 週報の設定
+WeeklyReportConfig:
+  MeetingDay: Thursday
+
 # 日報を送信するときの設定
 DailyReportSubmitConfig:
   Some:

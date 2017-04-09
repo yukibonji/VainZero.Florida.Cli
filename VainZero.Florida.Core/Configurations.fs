@@ -1,5 +1,6 @@
 ﻿namespace VainZero.Florida.Configurations
 
+open System
 open System.IO
 open FsYaml
 open VainZero.Florida.UI.Notifications
@@ -16,6 +17,11 @@ module Config =
         None
       DailyReportSubmitConfig =
         None
+      WeeklyReportConfig =
+        {
+          MeetingDay =
+            DayOfWeek.Friday
+        }
     }
 
   let private configPath = @"florida-config.yaml"

@@ -88,8 +88,8 @@ module DailyReport =
         )
 
     let submit submitConfig destinations subject content password =
-      let host = (submitConfig: DailyReportSubmitConfig).Host
-      use smtpClient = SmtpClient.create host submitConfig.SenderAddress password
+      let server = (submitConfig: DailyReportSubmitConfig).SmtpServer
+      use smtpClient = SmtpClient.create server.Name server.Port submitConfig.SenderAddress password
       let sender = MailAddress(submitConfig.SenderAddress, submitConfig.SenderName)
       smtpClient |> SmtpClient.send sender destinations subject content
 

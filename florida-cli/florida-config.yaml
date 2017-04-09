@@ -11,7 +11,9 @@ WeeklyReportConfig:
 DailyReportSubmitConfig:
   Some:
     # メールの送信元のホストサーバー
-    Host: example.com
+    SmtpServer:
+      Name: smtp.example.com
+      Port: 25
 
     # メールの送信者の名前
     SenderName: 無名

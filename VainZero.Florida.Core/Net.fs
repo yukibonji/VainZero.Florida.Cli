@@ -38,9 +38,10 @@ module SmtpClient =
   open System.Net
   open System.Net.Mail
 
-  let create (host: string) (userName: string) (password: string) =
+  let create (host: string) (port: int) (userName: string) (password: string) =
     new SmtpClient
       ( Host = host
+      , Port = port
       , Credentials = NetworkCredential(userName, password)
       )
 

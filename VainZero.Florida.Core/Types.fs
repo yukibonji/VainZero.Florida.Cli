@@ -6,12 +6,20 @@
 namespace VainZero.Florida.Configurations
   open System
 
+  type SmtpServer =
+    {
+      Name:
+        string
+      Port:
+        int
+    }
+
   /// 日報を送信するときの設定を表す。
   type DailyReportSubmitConfig =
     {
       /// メールの送信元のホストサーバーを取得する。
-      Host:
-        string
+      SmtpServer:
+        SmtpServer
       /// メールの送信者の名前を取得する。
       SenderName:
         string

@@ -103,7 +103,7 @@ module WeeklyReports =
           |> Option.map (fun note -> (activityName, note))
         )
       |> Map.ofArray // TODO: 順序を保つ。
-      |> Yaml.dump
+      |> Yaml.myDump
 
     let staff (config: Config) =
       {

@@ -48,6 +48,7 @@
       <Link>ErrorHandling.fs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="FsYaml.fs" />
     <Compile Include="Misc.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="IO.FileSystem.fs" />

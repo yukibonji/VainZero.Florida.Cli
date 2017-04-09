@@ -52,7 +52,7 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
 
     override this.AddOrUpdateAsync(date, report) =
       async {
-        let yaml = Yaml.dump report
+        let yaml = Yaml.myDump report
         return! File.writeAllTextAsync yaml (filePath date)
       }
 
@@ -106,7 +106,7 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
 
     override this.AddOrUpdateAsync(dateRange, report) =
       async {
-        let yaml = Yaml.dump report
+        let yaml = Yaml.myDump report
         return! File.writeAllTextAsync yaml (filePath dateRange)
       }
 

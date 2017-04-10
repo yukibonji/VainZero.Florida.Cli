@@ -189,7 +189,7 @@ module WeeklyReport =
           let date = dailyReport.日付
           for (i, work) in dailyReport.作業実績 |> Array.indexed do
             let dateString =
-              if i = 0 then date.ToString("yyyy/MM/dd") else ""
+              if i = 0 then date.ToString("MM/dd") else ""
             let dow =
               if i = 0 then date.DayOfWeek |> DayOfWeek.toKanji else ""
             let duration =

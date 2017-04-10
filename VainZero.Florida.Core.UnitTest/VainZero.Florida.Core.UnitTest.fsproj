@@ -46,6 +46,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Persimmon.fs" />
     <Compile Include="Collections.fs" />
+    <Compile Include="Text.Tests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VainZero.Florida.Core\VainZero.Florida.Core.fsproj">

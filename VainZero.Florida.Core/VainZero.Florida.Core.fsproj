@@ -44,6 +44,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ResultType.fs" />
     <Compile Include="..\paket-files\FSharpKit\FSharpKit.ErrorHandling\FSharpKit.ErrorHandling\Result.fs">
       <Paket>True</Paket>
       <Link>FSharpKit.ErrorHandling/Result.fs</Link>

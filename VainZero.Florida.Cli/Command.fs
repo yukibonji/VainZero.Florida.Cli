@@ -1,7 +1,7 @@
 ﻿namespace VainZero.Florida
 
 open System
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open VainZero.Florida
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
@@ -31,18 +31,18 @@ module Command =
     async {
       match command with
       | Command.Empty ->
-        return ok ()
+        return Ok ()
       | Command.Usage usage ->
         printUsage usage
-        return ok ()
+        return Ok ()
       | Command.DailyReportCreate date ->
         do! DailyReport.scaffoldAsync dataContext date
-        return ok ()
+        return Ok ()
       | Command.DailyReportSendMail date ->
         return! DailyReport.submitAsync config notifier dataContext date
       | Command.WeeklyReportCreate date ->
         do! WeeklyReport.generateAsync config dataContext date
-        return ok ()
+        return Ok ()
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
     }

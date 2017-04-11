@@ -3,7 +3,7 @@
 open System
 open System.IO
 open System.Net.Mail
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open VainZero.Collections
 open VainZero.Misc
 open VainZero.Net
@@ -106,11 +106,11 @@ module DailyReport =
           if (notifier: INotifier).Confirm(confirmationMessage) then
             let password = password submitConfig
             submit submitConfig destinations subject content password
-          return ok ()
+          return Ok ()
         | (None, _) ->
-          return "日報がありません。" |> fail
+          return "日報がありません。" |> Error
         | (_, None) ->
-          return "日報のメール送信の設定がありません。" |> fail
+          return "日報のメール送信の設定がありません。" |> Error
       }
 
   let submitAsync = Submit.submitAsync

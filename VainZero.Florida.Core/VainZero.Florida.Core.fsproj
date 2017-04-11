@@ -44,9 +44,21 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\paket-files\fsprojects\Chessie\src\Chessie\ErrorHandling.fs">
+    <Compile Include="..\paket-files\FSharpKit\FSharpKit.ErrorHandling\FSharpKit.ErrorHandling\Result.Backports.fs">
       <Paket>True</Paket>
-      <Link>ErrorHandling.fs</Link>
+      <Link>FSharpKit.ErrorHandling/Result.Backports.fs</Link>
+    </Compile>
+    <Compile Include="..\paket-files\FSharpKit\FSharpKit.ErrorHandling\FSharpKit.ErrorHandling\Result.fs">
+      <Paket>True</Paket>
+      <Link>FSharpKit.ErrorHandling/Result.fs</Link>
+    </Compile>
+    <Compile Include="..\paket-files\FSharpKit\FSharpKit.ErrorHandling\FSharpKit.ErrorHandling\AsyncResult.fs">
+      <Paket>True</Paket>
+      <Link>FSharpKit.ErrorHandling/AsyncResult.fs</Link>
+    </Compile>
+    <Compile Include="..\paket-files\FSharpKit\FSharpKit.ErrorHandling\FSharpKit.ErrorHandling\Option.fs">
+      <Paket>True</Paket>
+      <Link>FSharpKit.ErrorHandling/Option.fs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Misc.fs" />

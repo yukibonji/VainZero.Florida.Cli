@@ -1,2 +1,5 @@
-File:ErrorHandling.fs .
+File: Option.fs FSharpKit.ErrorHandling/
+File: Result.Backports.fs FSharpKit.ErrorHandling/
+File: Result.fs FSharpKit.ErrorHandling/
+File: AsyncResult.fs FSharpKit.ErrorHandling/
 VainZero.FsYaml

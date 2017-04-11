@@ -1,6 +1,8 @@
 source https://www.nuget.org/api/v2
 
-github fsprojects/Chessie src/Chessie/ErrorHandling.fs
+github FSharpKit/FSharpKit.ErrorHandling:v0.1.0 FSharpKit.ErrorHandling/Option.fs
+github FSharpKit/FSharpKit.ErrorHandling:v0.1.0 FSharpKit.ErrorHandling/Result.fs
+github FSharpKit/FSharpKit.ErrorHandling:v0.1.0 FSharpKit.ErrorHandling/AsyncResult.fs
 nuget VainZero.FsYaml ~> 2.0
 
 group Cli

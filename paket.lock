@@ -6,8 +6,10 @@ NUGET
       YamlDotNet (>= 4.1 < 5.0)
     YamlDotNet (4.1)
 GITHUB
-  remote: fsprojects/Chessie
-    src/Chessie/ErrorHandling.fs (f0237b5d23da6dbc33d8aab59c8be947f6878dfb)
+  remote: FSharpKit/FSharpKit.ErrorHandling
+    FSharpKit.ErrorHandling/AsyncResult.fs (16d57b3bcdc6fd2ae3f9768be7ca7a6a4e7b4ca6)
+    FSharpKit.ErrorHandling/Option.fs (16d57b3bcdc6fd2ae3f9768be7ca7a6a4e7b4ca6)
+    FSharpKit.ErrorHandling/Result.fs (16d57b3bcdc6fd2ae3f9768be7ca7a6a4e7b4ca6)
 GROUP Cli
 NUGET
   remote: https://www.nuget.org/api/v2

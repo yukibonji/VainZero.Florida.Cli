@@ -23,6 +23,13 @@ module Config =
           MeetingDay =
             DayOfWeek.Friday
         }
+      TimeSheetConfig =
+        {
+          DefaultFirstTime =
+            TimeSpan(9, 0, 0)
+          DefaultRecess =
+            TimeSpan(1, 0, 0)
+        }
     }
 
   let private configPath = @"florida-config.yaml"

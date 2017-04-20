@@ -76,6 +76,20 @@ type MemoryWeeklyReportExcelRepository() =
         dictionary.[dateRange] <- xml
       }
 
+type MemoryTimeSheetRepository() =
+  let dictionary = Dictionary<DateTime, TimeSheet>()
+
+  interface ITimeSheetRepository with
+    override this.FindAsync(month) =
+      async {
+        return dictionary |> Dictionary.tryItem month
+      }
+
+    override this.AddOrUpdateAsync(month, timeSheet) =
+      async {
+        dictionary |> Dictionary.addOrSet month timeSheet
+      }
+
 type MemoryDataContext() =
   interface IDisposable with
     override this.Dispose() = ()
@@ -89,6 +103,9 @@ type MemoryDataContext() =
 
     override val WeeklyReportExcels =
       MemoryWeeklyReportExcelRepository() :> IWeeklyReportExcelRepository
+
+    override val TimeSheets =
+      MemoryTimeSheetRepository() :> ITimeSheetRepository
 
 type MemoryDatabase() =
   let context = new MemoryDataContext()

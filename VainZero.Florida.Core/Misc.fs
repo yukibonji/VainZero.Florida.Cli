@@ -84,6 +84,11 @@ module DateTime =
       }
     loop firstDate.Date
 
+  let monthDates (month: DateTime) =
+    let firstDate = month.AddDays(float (1 - month.Day))
+    let lastDate = firstDate.AddMonths(1)
+    dates firstDate lastDate
+
 module Console =
   open System
   open Printf

@@ -62,6 +62,7 @@
     <Compile Include="Reports.Work.fs" />
     <Compile Include="Reports.DailyReport.fs" />
     <Compile Include="Reports.WeeklyReport.fs" />
+    <Compile Include="Reports.Timesheet.fs" />
     <Compile Include="Data.FileSystemDatabase.fs" />
     <Compile Include="Data.MemoryDatabase.fs" />
   </ItemGroup>

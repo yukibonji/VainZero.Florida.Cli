@@ -23,6 +23,8 @@ module Command =
       "週報の雛形を生成します。"
     | Command.WeeklyReportConvertToExcel _ ->
       "週報をエクセル形式に変換します。"
+    | Command.TimeSheetUpdate _ ->
+      "勤務表を更新します。"
 
   let printUsage usage =
     printfn "%s" usage
@@ -45,6 +47,8 @@ module Command =
         return ok ()
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
+      | Command.TimeSheetUpdate date ->
+        return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 
   let tryRecommendAsync (config: Config) (dataContext: IDataContext) date =

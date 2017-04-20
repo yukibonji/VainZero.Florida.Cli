@@ -31,6 +31,16 @@ with
       | Excel ->
         "週報をエクセルファイルに変換して開きます。"
 
+type TimeSheetArguments =
+  | [<CliPrefix(CliPrefix.None)>]
+    Update
+with
+  interface IArgParserTemplate with
+    override this.Usage =
+      match this with
+      | Update ->
+        "勤務表を更新します。"
+
 type Arguments =
   | [<CliPrefix(CliPrefix.None)>]
     [<AltCommandLine("dr")>]
@@ -40,6 +50,10 @@ type Arguments =
     [<AltCommandLine("wr")>]
     Weekly_Report
     of ParseResults<WeeklyReportArguments>
+  | [<CliPrefix(CliPrefix.None)>]
+    [<AltCommandLine("ts")>]
+    Time_Sheet
+    of ParseResults<TimeSheetArguments>
 with
   interface IArgParserTemplate with
     override this.Usage =
@@ -48,6 +62,8 @@ with
         "日報の作業を行います。"
       | Weekly_Report _ ->
         "週報の作業を行います。"
+      | Time_Sheet _ ->
+        "勤務表の作業を行います。"
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Arguments =
@@ -75,5 +91,10 @@ module Arguments =
           Command.WeeklyReportCreate date
         else if parseResults.Contains(<@ WeeklyReportArguments.Excel @>) then
           Command.WeeklyReportConvertToExcel date
+        else
+          parseResults.Parser |> usageCommand
+      | Time_Sheet parseResults ->
+        if parseResults.Contains(<@ TimeSheetArguments.Update @>) then
+          Command.TimeSheetUpdate date
         else
           parseResults.Parser |> usageCommand

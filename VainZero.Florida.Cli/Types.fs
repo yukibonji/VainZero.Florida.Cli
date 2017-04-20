@@ -14,3 +14,5 @@
       of DateTime
     | WeeklyReportConvertToExcel
       of DateTime
+    | TimeSheetUpdate
+      of DateTime

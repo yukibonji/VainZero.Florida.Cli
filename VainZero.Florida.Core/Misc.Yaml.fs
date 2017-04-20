@@ -1,9 +1,11 @@
-﻿namespace FsYaml
+﻿namespace VainZero.Florida.Misc
 
 open System
+open FsYaml
 open FsYaml.CustomTypeDefinition
 open FsYaml.NativeTypes
 open FsYaml.RepresentationTypes
+open VainZero.Misc
 
 module Yaml =
   let private dayOfWeekTypeDefinition =
@@ -24,9 +26,29 @@ module Yaml =
           Scalar (Plain name, None)
     }
 
+  let private dateTypeDefinition =
+    {
+      Accept =
+        fun typ -> typ = typeof<Date>
+      Construct =
+        fun cons typ source ->
+          match source with
+          | Scalar (Plain str, _)
+          | Scalar (NonPlain str, _) ->
+            str |> Date.parse :> obj
+          | _ ->
+            mustBeScalar typ source |> raise
+      Represent =
+        fun represent typ target ->
+          let date = target :?> Date
+          let str = date |> string
+          Scalar (Plain str, None)
+    }
+
   let private customTypeDefinitions =
     [
       dayOfWeekTypeDefinition
+      dateTypeDefinition
     ]
 
   let myLoad<'x> obj =

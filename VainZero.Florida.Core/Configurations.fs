@@ -3,6 +3,7 @@
 open System
 open System.IO
 open FsYaml
+open VainZero.Florida.Misc
 open VainZero.Florida.UI.Notifications
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]

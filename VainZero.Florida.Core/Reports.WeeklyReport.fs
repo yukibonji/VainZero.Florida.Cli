@@ -7,6 +7,7 @@ open FsYaml
 open VainZero.Collections
 open VainZero.Misc
 open VainZero.Text
+open VainZero.Florida.Misc
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
 

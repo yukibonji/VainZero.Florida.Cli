@@ -6,6 +6,7 @@ open FsYaml
 open VainZero.Collections
 open VainZero.IO
 open VainZero.Florida
+open VainZero.Florida.Misc
 open VainZero.Florida.Reports
 
 type MemoryDailyReportRepository() =

@@ -49,13 +49,14 @@
       <Link>ErrorHandling.fs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="FsYaml.fs" />
     <Compile Include="Misc.fs" />
+    <Compile Include="Misc.Date.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="IO.FileSystem.fs" />
     <Compile Include="Net.fs" />
     <Compile Include="Text.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="Misc.Yaml.fs" />
     <Compile Include="Configurations.fs" />
     <Compile Include="Reports.XmlTemplate.fs" />
     <Compile Include="Reports.Work.fs" />

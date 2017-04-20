@@ -1,9 +1,4 @@
-﻿namespace VainZero.Florida
-  open System
-
-  type DateRange = DateTime * DateTime
-
-namespace VainZero.Florida.Configurations
+﻿namespace VainZero.Florida.Configurations
   open System
 
   type SmtpServer =
@@ -137,6 +132,7 @@ namespace VainZero.Florida.Reports
 
 namespace VainZero.Florida.Data
   open System
+  open VainZero.Misc
   open VainZero.Florida
   open VainZero.Florida.Reports
 

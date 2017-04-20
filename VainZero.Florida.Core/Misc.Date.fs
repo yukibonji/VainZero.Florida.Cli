@@ -12,6 +12,8 @@ with
   override this.ToString() =
     sprintf "%04d-%02d-%02d" this.Year this.Month this.Day
 
+type DateRange = DateTime * DateTime
+
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Date =
   let create year month day =

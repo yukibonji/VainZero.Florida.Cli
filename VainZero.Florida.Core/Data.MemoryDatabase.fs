@@ -5,6 +5,7 @@ open System.Collections.Generic
 open FsYaml
 open VainZero.Collections
 open VainZero.IO
+open VainZero.Misc
 open VainZero.Florida
 open VainZero.Florida.Misc
 open VainZero.Florida.Reports

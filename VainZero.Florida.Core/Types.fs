@@ -64,6 +64,7 @@
 
 namespace VainZero.Florida.Reports
   open System
+  open VainZero.Misc
 
   /// 作業の記録を表す。
   type Work =
@@ -105,7 +106,7 @@ namespace VainZero.Florida.Reports
     {
       /// 作業日を取得する。
       ``日付``:
-        DateTime
+        Date
       /// その日の作業内容のリストを取得する。備考は無視される。
       ``作業実績``:
         array<Work>

@@ -2,7 +2,7 @@
 
 open System
 open System.IO
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open FsYaml
 open VainZero.Collections
 open VainZero.Misc
@@ -251,7 +251,7 @@ module WeeklyReport =
         let excelXml = weeklyReport |> toExcelXml
         do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
         dataContext.WeeklyReportExcels.Open(dateRange)
-        return ok ()
+        return Ok ()
       | None ->
-        return "週報がありません。" |> fail
+        return "週報がありません。" |> Error
     }

@@ -2,7 +2,7 @@
 
 open System
 open System.Collections.Generic
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open VainZero.Florida
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
@@ -67,7 +67,7 @@ module TimeSheet =
           |> Option.getOrElse (fun () -> create date)
           |> update date.Day item
         do! dataContext.TimeSheets.AddOrUpdateAsync(date, timeSheet)
-        return ok ()
+        return Ok ()
       | None ->
-        return fail "勤務表の更新には日報が必要です。"
+        return Error "勤務表の更新には日報が必要です。"
     }

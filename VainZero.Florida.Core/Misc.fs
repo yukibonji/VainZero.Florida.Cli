@@ -76,6 +76,7 @@ module DateTime =
     [|for i in 0..6 -> sunday.AddDays(float i)|]
 
   let dates (firstDate: DateTime) (lastDate: DateTime) =
+    let lastDate = lastDate.Date
     let rec loop date =
       seq {
         if date < lastDate then
@@ -83,6 +84,11 @@ module DateTime =
           yield! loop (date.AddDays(1.0))
       }
     loop firstDate.Date
+
+  let monthDates (month: DateTime) =
+    let firstDate = month.AddDays(float (1 - month.Day))
+    let lastDate = firstDate.AddMonths(1)
+    dates firstDate lastDate
 
 module Console =
   open System

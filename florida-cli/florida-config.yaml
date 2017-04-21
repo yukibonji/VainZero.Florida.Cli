@@ -35,9 +35,17 @@ DailyReportSubmitConfig:
     Bcc:
       - muna-tarou@example.com
 
-    Header: ''
+    # Header:
 
     Footer: |
       ------------
       |  Footer  |
       ------------
+
+TimeSheetConfig:
+  # 既定の勤務開始時間
+  DefaultFirstTime:
+    9:00:00
+  # 既定の休憩時間
+  DefaultRecess:
+    1:00:00

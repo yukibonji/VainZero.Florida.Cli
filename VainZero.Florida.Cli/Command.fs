@@ -23,6 +23,10 @@ module Command =
       "週報の雛形を生成します。"
     | Command.WeeklyReportConvertToExcel _ ->
       "週報をエクセル形式に変換します。"
+    | Command.TimeSheetUpdate _ ->
+      "勤務表を更新します。"
+    | Command.DailyReportFinalize _ ->
+      "日報を送信し、勤務表を更新します。"
 
   let printUsage usage =
     printfn "%s" usage
@@ -45,6 +49,15 @@ module Command =
         return ok ()
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
+      | Command.TimeSheetUpdate date ->
+        return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
+      | Command.DailyReportFinalize date ->
+        let! r = DailyReport.submitAsync config notifier dataContext date
+        match r with
+        | Ok ((), _) ->
+          return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
+        | Bad _ ->
+          return r
     }
 
   let tryRecommendAsync (config: Config) (dataContext: IDataContext) date =
@@ -55,9 +68,9 @@ module Command =
       if dailyReport |> Option.isNone then
         return Command.DailyReportCreate date |> Some
 
-      // 終業が近ければ、日報の送信をおすすめする。
+      // 終業が近ければ、日報の送信と勤務表の更新をおすすめする。
       else if date.TimeOfDay > TimeSpan(16, 30, 0) then
-        return Command.DailyReportSendMail date |> Some
+        return Command.DailyReportFinalize date |> Some
 
       // 週例会議の日なら、週報関連の作業をおすすめする。
       else if date.DayOfWeek = config.WeeklyReportConfig.MeetingDay then

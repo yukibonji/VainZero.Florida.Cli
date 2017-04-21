@@ -42,6 +42,14 @@
       MeetingDay: DayOfWeek
     }
 
+  type TimeSheetConfig =
+    {
+      DefaultFirstTime:
+        TimeSpan
+      DefaultRecess:
+        TimeSpan
+    }
+
   type Config =
     {
       // 日報などを保存するディレクトリ―を取得する。
@@ -60,10 +68,13 @@
       /// 省略された場合、メールは送信できない。
       DailyReportSubmitConfig:
         option<DailyReportSubmitConfig>
+      TimeSheetConfig:
+        TimeSheetConfig
     }
 
 namespace VainZero.Florida.Reports
   open System
+  open System.Collections.Generic
   open VainZero.Misc
 
   /// 作業の記録を表す。
@@ -131,6 +142,22 @@ namespace VainZero.Florida.Reports
         string
     }
 
+  type TimeSheetItem =
+    {
+      ``開始時刻``:
+        option<TimeSpan>
+      ``終了時刻``:
+        option<TimeSpan>
+      ``休憩時間``:
+        option<TimeSpan>
+      ``備考``:
+        option<string>
+    }
+
+  /// 勤務表を表す。
+  type TimeSheet =
+    array<KeyValuePair<int, TimeSheetItem>>
+
 namespace VainZero.Florida.Data
   open System
   open VainZero.Misc
@@ -161,12 +188,17 @@ namespace VainZero.Florida.Data
     abstract Open: DateRange -> unit
     abstract AddOrUpdateAsync: DateRange * string -> Async<unit>
 
+  type ITimeSheetRepository =
+    abstract FindAsync: month: DateTime -> Async<option<TimeSheet>>
+    abstract AddOrUpdateAsync: month: DateTime * TimeSheet -> Async<unit>
+
   type IDataContext =
     inherit IDisposable
 
     abstract DailyReports: IDailyReportRepository
     abstract WeeklyReports: IWeeklyReportRepository
     abstract WeeklyReportExcels: IWeeklyReportExcelRepository
+    abstract TimeSheets: ITimeSheetRepository
 
   type IDatabase =
     abstract Connect: unit -> IDataContext

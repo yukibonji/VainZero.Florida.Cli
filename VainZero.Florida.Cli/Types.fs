@@ -14,3 +14,8 @@
       of DateTime
     | WeeklyReportConvertToExcel
       of DateTime
+    | TimeSheetUpdate
+      of DateTime
+    /// Composite command of DailyReprotCreate and TimeSheetUpdate.
+    | DailyReportFinalize
+      of DateTime

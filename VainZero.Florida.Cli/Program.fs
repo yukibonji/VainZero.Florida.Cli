@@ -63,4 +63,6 @@ module Program =
       eprintfn "ERROR:"
       for error in errors do
         eprintfn "%s" error
+      if args |> Array.isEmpty then
+        Console.ReadKey() |> ignore
       1 // error

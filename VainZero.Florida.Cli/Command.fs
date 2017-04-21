@@ -32,31 +32,25 @@ module Command =
     printfn "%s" usage
 
   let executeAsync config notifier dataContext command =
-    async {
+    AsyncResult.build {
       match command with
       | Command.Empty ->
-        return Ok ()
+        ()
       | Command.Usage usage ->
         printUsage usage
-        return Ok ()
       | Command.DailyReportCreate date ->
         do! DailyReport.scaffoldAsync dataContext date
-        return Ok ()
       | Command.DailyReportSendMail date ->
         return! DailyReport.submitAsync config notifier dataContext date
       | Command.WeeklyReportCreate date ->
         do! WeeklyReport.generateAsync config dataContext date
-        return Ok ()
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
       | Command.TimeSheetUpdate date ->
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
       | Command.DailyReportFinalize date ->
-        return!
-          AsyncResult.build {
-            do! DailyReport.submitAsync config notifier dataContext date
-            return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
-          }
+        do! DailyReport.submitAsync config notifier dataContext date
+        return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 
   let tryRecommendAsync (config: Config) (dataContext: IDataContext) date =

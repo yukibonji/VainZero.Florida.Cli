@@ -1,7 +1,7 @@
 ﻿namespace VainZero.Florida
 
 open System
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open VainZero.Florida
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
@@ -32,32 +32,25 @@ module Command =
     printfn "%s" usage
 
   let executeAsync config notifier dataContext command =
-    async {
+    AsyncResult.build {
       match command with
       | Command.Empty ->
-        return ok ()
+        ()
       | Command.Usage usage ->
         printUsage usage
-        return ok ()
       | Command.DailyReportCreate date ->
         do! DailyReport.scaffoldAsync dataContext date
-        return ok ()
       | Command.DailyReportSendMail date ->
         return! DailyReport.submitAsync config notifier dataContext date
       | Command.WeeklyReportCreate date ->
         do! WeeklyReport.generateAsync config dataContext date
-        return ok ()
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
       | Command.TimeSheetUpdate date ->
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
       | Command.DailyReportFinalize date ->
-        let! r = DailyReport.submitAsync config notifier dataContext date
-        match r with
-        | Ok ((), _) ->
-          return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
-        | Bad _ ->
-          return r
+        do! DailyReport.submitAsync config notifier dataContext date
+        return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 
   let tryRecommendAsync (config: Config) (dataContext: IDataContext) date =

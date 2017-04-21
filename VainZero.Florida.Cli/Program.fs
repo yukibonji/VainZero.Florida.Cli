@@ -4,7 +4,7 @@ open System
 open System.Diagnostics
 open System.IO
 open Argu
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open FsYaml
 open VainZero.Misc
 open VainZero.Florida.Configurations
@@ -51,18 +51,17 @@ module Program =
         return! Command.executeAsync config notifier dataContext command
       with
       | e ->
-        return e |> string |> fail
+        return e |> string |> Error
     }
 
   [<EntryPoint>]
   let main args =
     match runAsync args |> Async.RunSynchronously with
-    | Ok ((), _) ->
+    | Ok () ->
       0 // success
-    | Bad errors ->
+    | Error error ->
       eprintfn "ERROR:"
-      for error in errors do
-        eprintfn "%s" error
+      eprintfn "%s" error
       if args |> Array.isEmpty then
         Console.ReadKey() |> ignore
       1 // error

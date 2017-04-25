@@ -47,6 +47,7 @@
     <Compile Include="Persimmon.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="Text.Tests.fs" />
+    <Compile Include="Misc.Yaml.Tests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VainZero.Florida.Core\VainZero.Florida.Core.fsproj">
@@ -82,6 +83,7 @@
     <PostBuildEvent>$(SolutionDir)\packages\unittest\Persimmon.Console\tools\Persimmon.Console.exe $(TargetPath)
 </PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\.paket\paket.targets" />
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
@@ -140,5 +142,4 @@
       </ItemGroup>
     </When>
   </Choose>
-  <Import Project="..\.paket\paket.targets" />
 </Project>

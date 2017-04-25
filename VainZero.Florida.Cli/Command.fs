@@ -1,7 +1,7 @@
 ﻿namespace VainZero.Florida
 
 open System
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open VainZero.Florida
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
@@ -23,28 +23,34 @@ module Command =
       "週報の雛形を生成します。"
     | Command.WeeklyReportConvertToExcel _ ->
       "週報をエクセル形式に変換します。"
+    | Command.TimeSheetUpdate _ ->
+      "勤務表を更新します。"
+    | Command.DailyReportFinalize _ ->
+      "日報を送信し、勤務表を更新します。"
 
   let printUsage usage =
     printfn "%s" usage
 
   let executeAsync config notifier dataContext command =
-    async {
+    AsyncResult.build {
       match command with
       | Command.Empty ->
-        return ok ()
+        ()
       | Command.Usage usage ->
         printUsage usage
-        return ok ()
       | Command.DailyReportCreate date ->
         do! DailyReport.scaffoldAsync dataContext date
-        return ok ()
       | Command.DailyReportSendMail date ->
         return! DailyReport.submitAsync config notifier dataContext date
       | Command.WeeklyReportCreate date ->
         do! WeeklyReport.generateAsync config dataContext date
-        return ok ()
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
+      | Command.TimeSheetUpdate date ->
+        return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
+      | Command.DailyReportFinalize date ->
+        do! DailyReport.submitAsync config notifier dataContext date
+        return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 
   let tryRecommendAsync (config: Config) (dataContext: IDataContext) date =
@@ -55,9 +61,9 @@ module Command =
       if dailyReport |> Option.isNone then
         return Command.DailyReportCreate date |> Some
 
-      // 終業が近ければ、日報の送信をおすすめする。
+      // 終業が近ければ、日報の送信と勤務表の更新をおすすめする。
       else if date.TimeOfDay > TimeSpan(16, 30, 0) then
-        return Command.DailyReportSendMail date |> Some
+        return Command.DailyReportFinalize date |> Some
 
       // 週例会議の日なら、週報関連の作業をおすすめする。
       else if date.DayOfWeek = config.WeeklyReportConfig.MeetingDay then

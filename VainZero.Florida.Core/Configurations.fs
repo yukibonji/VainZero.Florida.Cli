@@ -3,6 +3,7 @@
 open System
 open System.IO
 open FsYaml
+open VainZero.Florida.Misc
 open VainZero.Florida.UI.Notifications
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -21,6 +22,13 @@ module Config =
         {
           MeetingDay =
             DayOfWeek.Friday
+        }
+      TimeSheetConfig =
+        {
+          DefaultFirstTime =
+            TimeSpan(9, 0, 0)
+          DefaultRecess =
+            TimeSpan(1, 0, 0)
         }
     }
 

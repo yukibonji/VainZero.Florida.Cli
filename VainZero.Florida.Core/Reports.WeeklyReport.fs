@@ -2,11 +2,12 @@
 
 open System
 open System.IO
-open Chessie.ErrorHandling
+open FSharpKit.ErrorHandling
 open FsYaml
 open VainZero.Collections
 open VainZero.Misc
 open VainZero.Text
+open VainZero.Florida.Misc
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
 
@@ -97,7 +98,7 @@ module WeeklyReport =
       |> Array.map
         (fun (date, report) ->
           {
-            日付 = date
+            日付 = date |> Date.ofDateTime
             作業実績 =
               (report: DailyReport).作業実績
               |> Array.map (fun dr -> { dr with 備考 = None })
@@ -186,7 +187,7 @@ module WeeklyReport =
     let dayRows (wr: WeeklyReport) =
       [|
         for dailyReport in wr.日別の内容 do
-          let date = dailyReport.日付
+          let date = dailyReport.日付 |> Date.toDateTime
           for (i, work) in dailyReport.作業実績 |> Array.indexed do
             let dateString =
               if i = 0 then date.ToString("MM/dd") else ""
@@ -250,7 +251,7 @@ module WeeklyReport =
         let excelXml = weeklyReport |> toExcelXml
         do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
         dataContext.WeeklyReportExcels.Open(dateRange)
-        return ok ()
+        return Ok ()
       | None ->
-        return "週報がありません。" |> fail
+        return "週報がありません。" |> Error
     }

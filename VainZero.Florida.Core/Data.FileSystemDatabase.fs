@@ -1,12 +1,13 @@
 ﻿namespace VainZero.Florida.Data
 
 open System
+open System.Collections.Generic
 open System.Diagnostics
 open System.IO
 open FsYaml
 open VainZero.Collections
 open VainZero.IO
-open VainZero.Florida
+open VainZero.Florida.Misc
 open VainZero.Florida.Reports
 
 module internal DirectoryInfo =
@@ -158,6 +159,34 @@ type FileSystemWeeklyReportExcelRepository(root: DirectoryInfo) =
     override this.AddOrUpdateAsync(dateRange, xml) =
       File.writeAllTextAsync xml (filePath dateRange)
 
+type FileSystemTimeSheetRepository(root: DirectoryInfo) =
+  let subdirectory =
+    DirectoryInfo(Path.Combine(root.FullName, "time-sheets"))
+
+  let filePath (month: DateTime) =
+    let fileName = month.ToString("yyyy-MM") + ".yaml"
+    Path.Combine(subdirectory.FullName, fileName)
+
+  do subdirectory |> DirectoryInfo.createUnlessExists
+
+  interface ITimeSheetRepository with
+    override this.FindAsync(month) =
+      async {
+        try
+          let! source = File.readAllTextAsync (filePath month)
+          let timeSheet = Yaml.myLoad source
+          return Some timeSheet
+        with
+        | _ ->
+          return None
+      }
+
+    override this.AddOrUpdateAsync(month, timeSheet) =
+      async {
+        let yaml = timeSheet |> Yaml.myDump
+        return! File.writeAllTextAsync yaml (filePath month)
+      }
+
 type FileSystemDataContext(root: DirectoryInfo) =
   interface IDisposable with
     override this.Dispose() = ()
@@ -171,6 +200,9 @@ type FileSystemDataContext(root: DirectoryInfo) =
 
     override val WeeklyReportExcels =
       FileSystemWeeklyReportExcelRepository(root) :> IWeeklyReportExcelRepository
+
+    override val TimeSheets =
+      FileSystemTimeSheetRepository(root) :> ITimeSheetRepository
 
 type FileSystemDatabase(root: DirectoryInfo) =
   interface IDatabase with

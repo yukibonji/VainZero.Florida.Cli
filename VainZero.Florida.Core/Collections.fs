@@ -51,3 +51,19 @@ module Array =
       if set.Add(x) then
         ys.Add(x)
     ys |> Seq.toArray
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module Dictionary =
+  open System.Collections.Generic
+
+  let tryItem key (dictionary: IReadOnlyDictionary<_, _>) =
+    match dictionary.TryGetValue(key) with
+    | (true, value) ->
+      Some value
+    | (false, _) ->
+      None
+
+  let addOrSet key value (dictionary: IDictionary<_, _>) =
+    if dictionary.ContainsKey(key)
+    then dictionary.[key] <- value
+    else dictionary.Add(key, value)

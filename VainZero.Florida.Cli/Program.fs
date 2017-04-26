@@ -56,6 +56,9 @@ module Program =
 
   [<EntryPoint>]
   let main args =
+    TimeSheet.convertToExcel ()
+    exit 0
+
     match runAsync args |> Async.RunSynchronously with
     | Ok () ->
       0 // success

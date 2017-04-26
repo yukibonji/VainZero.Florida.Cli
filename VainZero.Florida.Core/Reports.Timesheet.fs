@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open FSharpKit.ErrorHandling
+open OfficeOpenXml
 open VainZero.Florida
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
@@ -80,3 +81,31 @@ module TimeSheet =
             e |> string
         return Error error
     }
+
+  [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+  module ConvertToExcel =
+    let templateFile = System.IO.FileInfo(@"data/time-sheet-excels/template.xlsx")
+    let file = templateFile.CopyTo("data/time-sheet-excels/x.xlsx", overwrite = true)
+    let date = DateTime.Now
+
+    let convertToExcel () =
+      use package = new ExcelPackage(file)
+      let sheet = package.Workbook.Worksheets.[1]
+
+      // Headers
+      sheet.Cells.[2, 1].Value <- date
+      sheet.Cells.[2, 7].Value <- "田中太郎" //config.Name
+
+      // Records
+      (*
+      let rec loop rowIndex =
+        sheet.Cells.[rowIndex, 3].Value <- TimeSpan(9, 30, 0)
+        sheet.Cells.[rowIndex, 4].Value <- TimeSpan(18, 30, 0)
+        sheet.Cells.[rowIndex, 5].Value <- TimeSpan(1, 0, 0)
+        sheet.Cells.[rowIndex, 7].Value <- "Note"
+      loop 5
+      //*)
+
+      package.Save()
+
+  let convertToExcel = ConvertToExcel.convertToExcel

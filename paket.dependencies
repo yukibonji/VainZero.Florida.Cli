@@ -4,6 +4,7 @@ github FSharpKit/FSharpKit.ErrorHandling:v0.3.0 FSharpKit.ErrorHandling/Option.f
 github FSharpKit/FSharpKit.ErrorHandling:v0.3.0 FSharpKit.ErrorHandling/Result.Backports.fs
 github FSharpKit/FSharpKit.ErrorHandling:v0.3.0 FSharpKit.ErrorHandling/Result.fs
 github FSharpKit/FSharpKit.ErrorHandling:v0.3.0 FSharpKit.ErrorHandling/AsyncResult.fs
+nuget EPPlus ~> 4.0 >= 4.1.0
 nuget VainZero.FsYaml ~> 2.0 >= 2.5
 
 group Cli

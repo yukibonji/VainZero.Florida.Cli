@@ -2,4 +2,5 @@ File: Option.fs FSharpKit.ErrorHandling/
 File: Result.Backports.fs FSharpKit.ErrorHandling/
 File: Result.fs FSharpKit.ErrorHandling/
 File: AsyncResult.fs FSharpKit.ErrorHandling/
+EPPlus
 VainZero.FsYaml

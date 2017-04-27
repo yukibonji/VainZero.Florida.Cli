@@ -15,3 +15,17 @@ module File =
 
   let readAllTextAsync (filePath: string) =
     File.OpenText(filePath).ReadToEndAsync() |> Async.AwaitTask
+
+  let tryReadAllTextAsync (filePath: string) =
+    async {
+      try
+        if File.Exists(filePath) then
+          let! content = readAllTextAsync filePath
+          return Ok content
+        else
+          let message = sprintf "File not found: '%s'." filePath
+          return FileNotFoundException(message, filePath) :> exn |> Error
+      with
+      | e ->
+        return e |> Error
+    }

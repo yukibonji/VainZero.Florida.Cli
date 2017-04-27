@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Collections.Generic
 open FSharpKit.ErrorHandling
 open FsYaml
 open VainZero.Collections
@@ -112,10 +113,9 @@ module WeeklyReport =
         (fun activityName ->
           activityNotes
           |> Map.tryFind activityName
-          |> Option.map (fun note -> (activityName, note))
+          |> Option.map (fun note -> KeyValuePair(activityName, note))
         )
-      |> Map.ofArray // TODO: 順序を保つ。
-      |> Yaml.myDump
+      |> Yaml.myDump<array<KeyValuePair<_, _>>>
 
     let staff (config: Config) =
       {

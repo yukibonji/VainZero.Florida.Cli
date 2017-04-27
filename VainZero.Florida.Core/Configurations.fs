@@ -32,8 +32,8 @@ module Config =
         }
     }
 
-  let private configPath = @"./data/florida-config.yaml"
-  let private configTemplatePath = @"./data/florida-config-template.yaml"
+  let private configPath = @"./data/config.yaml"
+  let private configTemplatePath = @"./data/config-template.yaml"
 
   let private tryLoad () =
     try

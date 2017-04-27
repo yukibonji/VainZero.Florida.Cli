@@ -32,7 +32,7 @@ module Config =
         }
     }
 
-  let private configPath = @"florida-config.yaml"
+  let private configPath = @"./data/florida-config.yaml"
 
   let load (notifier: INotifier) =
     try

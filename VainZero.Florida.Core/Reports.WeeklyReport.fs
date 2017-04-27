@@ -49,10 +49,10 @@ module WeeklyReport =
 
   module internal GenerateFromDailyReports =
     /// 指定された日付に生成すべき週報の対象となる日報をすべて検索する。
-    let dailyReportsAsync (dataContext: IDataContext) (firstDate, lastDate) =
+    let dailyReportsAsync (dataContext: IDataContext) (firstDate, lastDate: DateTime) =
       async {
         let! reports =
-          DateTime.dates firstDate lastDate
+          DateTime.dates firstDate (lastDate.AddDays(1.0))
           |> Seq.map
             (fun date ->
               async {

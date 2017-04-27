@@ -3,6 +3,7 @@
 open System
 open System.IO
 open FsYaml
+open VainZero.IO
 open VainZero.Florida.Misc
 open VainZero.Florida.UI.Notifications
 
@@ -11,13 +12,18 @@ module Config =
   let private configPath = @"./data/config.yaml"
   let private configTemplatePath = @"./data/config-template.yaml"
 
-  let private tryLoad () =
-    try
-      if File.Exists(configPath)
-      then File.ReadAllText(configPath) |> Some
-      else None
-    with
-    | _ -> None
+  let private tryLoadAsync () =
+    async {
+      try
+        if File.Exists(configPath) then
+          let! content = File.readAllTextAsync configPath
+          return Some content
+        else
+          return None
+      with
+      | _ ->
+        return None
+    }
 
   let private createFromTemplate () =
     try
@@ -26,17 +32,23 @@ module Config =
     | e ->
       exn("設定ファイルの生成に失敗しました。", e) |> raise
 
-  let private loadOrCreate () =
-    match tryLoad () with
-    | Some yaml -> yaml
-    | None ->
-      createFromTemplate ()
-      File.ReadAllText(configPath)
+  let private loadOrCreateAsync () =
+    async {
+      let! yaml = tryLoadAsync ()
+      match yaml with
+      | Some yaml ->
+        return yaml
+      | None ->
+        createFromTemplate ()
+        return! File.readAllTextAsync configPath
+    }
 
-  let load () =
-    try
-      let yaml = loadOrCreate ()
-      Yaml.myLoad<Config> yaml
-    with
-    | e ->
-      exn("設定ファイルが見つからないか、解析に失敗しました。", e) |> raise
+  let loadAsync () =
+    async {
+      try
+        let! yaml = loadOrCreateAsync ()
+        return Yaml.myLoad<Config> yaml
+      with
+      | e ->
+        return! exn("設定ファイルが見つからないか、解析に失敗しました。", e) |> raise
+    }

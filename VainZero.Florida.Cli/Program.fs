@@ -44,7 +44,7 @@ module Program =
     async {
       try
         let notifier = ConsoleNotifier() :> INotifier
-        let config = Config.load ()
+        let! config = Config.loadAsync ()
         let database = FileSystemDatabase(DirectoryInfo(config.RootDirectory)) :> IDatabase
         use dataContext = database.Connect()
         let! command = createCommandAsync config dataContext args

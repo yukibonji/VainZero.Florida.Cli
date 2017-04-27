@@ -12,19 +12,6 @@ module Config =
   let private configPath = @"./data/config.yaml"
   let private configTemplatePath = @"./data/config-template.yaml"
 
-  let private tryLoadAsync () =
-    async {
-      try
-        if File.Exists(configPath) then
-          let! content = File.readAllTextAsync configPath
-          return Some content
-        else
-          return None
-      with
-      | _ ->
-        return None
-    }
-
   let private createFromTemplate () =
     try
       File.Copy(configTemplatePath, configPath)
@@ -34,11 +21,11 @@ module Config =
 
   let private loadOrCreateAsync () =
     async {
-      let! yaml = tryLoadAsync ()
+      let! yaml = File.tryReadAllTextAsync configPath
       match yaml with
-      | Some yaml ->
+      | Ok yaml ->
         return yaml
-      | None ->
+      | Error _ ->
         createFromTemplate ()
         return! File.readAllTextAsync configPath
     }

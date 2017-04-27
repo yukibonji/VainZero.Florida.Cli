@@ -33,14 +33,34 @@ module Config =
     }
 
   let private configPath = @"./data/florida-config.yaml"
+  let private configTemplatePath = @"./data/florida-config-template.yaml"
 
-  let load (notifier: INotifier) =
+  let private tryLoad () =
     try
-      let yaml = File.ReadAllText(configPath)
+      if File.Exists(configPath)
+      then File.ReadAllText(configPath) |> Some
+      else None
+    with
+    | _ -> None
+
+  let private createFromTemplate () =
+    try
+      File.Copy(configTemplatePath, configPath)
+    with
+    | e ->
+      exn("設定ファイルの生成に失敗しました。", e) |> raise
+
+  let private loadOrCreate () =
+    match tryLoad () with
+    | Some yaml -> yaml
+    | None ->
+      createFromTemplate ()
+      File.ReadAllText(configPath)
+
+  let load () =
+    try
+      let yaml = loadOrCreate ()
       Yaml.myLoad<Config> yaml
     with
     | e ->
-      let message =
-        sprintf "設定ファイルが見つからないか、解析に失敗しました。既定の設定を使用してアプリケーションを起動します。エラーメッセージは以下の通りです:\r\n%s" e.Message
-      notifier.NotifyWarning(message)
-      empty
+      exn("設定ファイルが見つからないか、解析に失敗しました。", e) |> raise

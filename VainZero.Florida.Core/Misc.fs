@@ -95,6 +95,13 @@ module DateTime =
     let endDate = firstDate.AddMonths(1)
     dates firstDate endDate
 
+  let tryParse str =
+    match DateTime.TryParse(str) with
+    | (true, dateTime) ->
+      Some dateTime
+    | (false, _) ->
+      None
+
 module Console =
   open System
   open Printf

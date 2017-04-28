@@ -1,6 +1,7 @@
 ﻿namespace VainZero.Florida
 
 open System
+open System.IO
 open FSharpKit.ErrorHandling
 open VainZero.Florida
 open VainZero.Florida.Configurations
@@ -70,9 +71,9 @@ module Command =
         let! dateRange = WeeklyReport.dateRangeFromDateAsync dataContext date
         let! report = dataContext.WeeklyReports.FindAsync dateRange
         match report with
-        | None ->
+        | Error (:? FileNotFoundException) ->
           return Command.WeeklyReportCreate date |> Some
-        | Some _ ->
+        | _ ->
           return Command.WeeklyReportConvertToExcel date |> Some
       else
         return None

@@ -14,7 +14,10 @@ module File =
     }
 
   let readAllTextAsync (filePath: string) =
-    File.OpenText(filePath).ReadToEndAsync() |> Async.AwaitTask
+    async {
+      use stream = File.OpenText(filePath)
+      return! stream.ReadToEndAsync() |> Async.AwaitTask
+    }
 
   let tryReadAllTextAsync (filePath: string) =
     async {

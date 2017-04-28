@@ -50,14 +50,10 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
       }
 
     override this.FindAsync(date) =
-      async {
-        try
-          let! yaml = File.readAllTextAsync (filePath date)
-          let report = Yaml.myLoad<DailyReport> yaml
-          return Some (yaml, report)
-        with
-        | _ ->
-          return None
+      AsyncResult.build {
+        let! yaml = File.tryReadAllTextAsync (filePath date)
+        let! report = Yaml.tryMyLoad<DailyReport> yaml
+        return (yaml, report)
       }
 
     override this.FirstDateAsync =

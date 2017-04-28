@@ -58,7 +58,12 @@ module WeeklyReport =
             (fun date ->
               async {
                 let! report = dataContext.DailyReports.FindAsync(date)
-                return report |> Option.map (fun (_, report) -> (date, report))
+                return
+                  match report with
+                  | Ok (_, report) ->
+                    Some (date, report)
+                  | Error _ ->
+                    None
               }
             )
           |> Async.Parallel

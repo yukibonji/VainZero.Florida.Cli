@@ -98,7 +98,7 @@ module DailyReport =
         let! report = (dataContext: IDataContext).DailyReports.FindAsync(date)
         let submitConfig = config.DailyReportSubmitConfig
         match (report, submitConfig) with
-        | (Some (yaml, report), Some submitConfig) ->
+        | (Ok (yaml, report), Some submitConfig) ->
           let destinations = destinations submitConfig report
           let subject = subject submitConfig date
           let content = content submitConfig yaml
@@ -107,8 +107,17 @@ module DailyReport =
             let password = password submitConfig
             submit submitConfig destinations subject content password
           return Ok ()
-        | (None, _) ->
-          return "日報がありません。" |> Error
+        | (Error e, _) ->
+          let error =
+            match e with
+            | :? FsYaml.FsYamlException as e ->
+              sprintf "日報の解析に失敗しました: %s" e.Message
+            | :? FileNotFoundException
+            | :? DirectoryNotFoundException ->
+              "日報がありません。"
+            | _ ->
+              e |> string
+          return Error error
         | (_, None) ->
           return "日報のメール送信の設定がありません。" |> Error
       }

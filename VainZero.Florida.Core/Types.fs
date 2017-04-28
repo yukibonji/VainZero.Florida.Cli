@@ -166,7 +166,7 @@ namespace VainZero.Florida.Data
 
   type IDailyReportRepository =
     abstract Open: DateTime -> unit
-    abstract FindAsync: DateTime -> Async<option<string * DailyReport>>
+    abstract FindAsync: DateTime -> Async<Result<string * DailyReport, exn>>
 
     /// 指定された日付の日報の雛形を生成する。
     abstract ScaffoldAsync: DateTime -> Async<unit>

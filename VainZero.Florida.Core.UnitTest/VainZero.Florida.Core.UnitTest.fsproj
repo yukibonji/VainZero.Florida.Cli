@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Persimmon.fs" />
+    <Compile Include="Misc.Tests.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="Text.Tests.fs" />
     <Compile Include="Misc.Yaml.Tests.fs" />

@@ -38,6 +38,11 @@ module String =
   let splitBySpaces (self: string) =
     self.Split([| ' '; '\t'; '\r'; '\n' |], StringSplitOptions.RemoveEmptyEntries)
 
+  let trySubstring index count (str: string) =
+    if index >= 0 && count >= 0 && index + count <= str.Length
+    then str.Substring(index, count) |> Some
+    else None
+
 module DayOfWeek =
   open System
 
@@ -89,6 +94,13 @@ module DateTime =
     let firstDate = month.AddDays(float (1 - month.Day))
     let endDate = firstDate.AddMonths(1)
     dates firstDate endDate
+
+  let tryParse str =
+    match DateTime.TryParse(str) with
+    | (true, dateTime) ->
+      Some dateTime
+    | (false, _) ->
+      None
 
 module Console =
   open System

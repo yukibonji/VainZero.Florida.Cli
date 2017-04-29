@@ -28,9 +28,9 @@ type MemoryDailyReportRepository() =
       async {
         match dictionary.TryGetValue(date) with
         | (true, value) ->
-          return Some value
+          return Ok value
         | (false, _) ->
-          return None
+          return KeyNotFoundException() :> exn |> Error
       }
 
     override this.FirstDateAsync =
@@ -49,9 +49,9 @@ type MemoryWeeklyReportRepository() =
       async {
         match dictionary.TryGetValue(dateRange) with
         | (true, report) ->
-          return Some report
+          return Ok report
         | (false, _) ->
-          return None
+          return KeyNotFoundException() :> exn |> Error
       }
 
     override this.AddOrUpdateAsync(dateRange, report) =

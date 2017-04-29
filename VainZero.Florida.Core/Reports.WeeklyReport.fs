@@ -58,7 +58,12 @@ module WeeklyReport =
             (fun date ->
               async {
                 let! report = dataContext.DailyReports.FindAsync(date)
-                return report |> Option.map (fun (_, report) -> (date, report))
+                return
+                  match report with
+                  | Ok (_, report) ->
+                    Some (date, report)
+                  | Error _ ->
+                    None
               }
             )
           |> Async.Parallel
@@ -247,11 +252,19 @@ module WeeklyReport =
       let! dateRange = dateRangeFromDateAsync dataContext date
       let! weeklyReport = dataContext.WeeklyReports.FindAsync(dateRange)
       match weeklyReport with
-      | Some weeklyReport ->
+      | Ok weeklyReport ->
         let excelXml = weeklyReport |> toExcelXml
         do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
         dataContext.WeeklyReportExcels.Open(dateRange)
         return Ok ()
-      | None ->
-        return "週報がありません。" |> Error
+      | Error e ->
+        let error =
+          match e with
+          | :? FsYaml.FsYamlException as e ->
+            sprintf "週報の解析に失敗しました: %s" e.Message
+          | :? FileNotFoundException ->
+            "エクセルファイルに変換する対象の週報がありません。"
+          | _ ->
+            e |> string
+        return Error error
     }

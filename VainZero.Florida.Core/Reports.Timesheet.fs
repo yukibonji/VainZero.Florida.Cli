@@ -1,6 +1,7 @@
 ﻿namespace VainZero.Florida.Reports
 
 open System
+open System.IO
 open System.Collections.Generic
 open FSharpKit.ErrorHandling
 open VainZero.Florida
@@ -59,7 +60,7 @@ module TimeSheet =
     async {
       let! report = dataContext.DailyReports.FindAsync(date)
       match report with
-      | Some (_, report) ->
+      | Ok (_, report) ->
         let item = TimeSheetItem.fromDailyReport config report
         let! timeSheet = dataContext.TimeSheets.FindAsync(date)
         let timeSheet =
@@ -68,6 +69,14 @@ module TimeSheet =
           |> update date.Day item
         do! dataContext.TimeSheets.AddOrUpdateAsync(date, timeSheet)
         return Ok ()
-      | None ->
-        return Error "勤務表の更新には日報が必要です。"
+      | Error e ->
+        let error =
+          match e with
+          | :? FsYaml.FsYamlException as e ->
+            sprintf "日報を解析できません: %s" e.Message
+          | :? FileNotFoundException ->
+            "勤務表の更新には日報が必要です。"
+          | e ->
+            e |> string
+        return Error error
     }

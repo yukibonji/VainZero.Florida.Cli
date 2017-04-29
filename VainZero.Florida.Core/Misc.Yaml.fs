@@ -54,6 +54,13 @@ module Yaml =
   let myLoad<'x> obj =
     Yaml.loadWith<'x> customTypeDefinitions obj
 
+  let tryMyLoad<'x> obj: Result<'x, exn> =
+    try
+      myLoad<'x> obj |> Ok
+    with
+    | e ->
+      Error e
+
   let myDump<'x> obj =
     let yaml = Yaml.dumpWith<'x> customTypeDefinitions obj
 
@@ -65,3 +72,10 @@ module Yaml =
     let yaml = yaml.Replace(": >-", ": |").Replace(": >", ": |")
 
     yaml
+
+  let tryMyDump<'x> obj: Result<string, exn> =
+    try
+      myDump<'x> obj |> Ok
+    with
+    | e ->
+      Error e

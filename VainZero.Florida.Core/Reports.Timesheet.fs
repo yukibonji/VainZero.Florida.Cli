@@ -84,28 +84,40 @@ module TimeSheet =
 
   [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
   module ConvertToExcel =
-    let templateFile = System.IO.FileInfo(@"data/time-sheet-excels/template.xlsx")
-    let file = templateFile.CopyTo("data/time-sheet-excels/x.xlsx", overwrite = true)
-    let date = DateTime.Now
-
     let convertToExcel () =
-      use package = new ExcelPackage(file)
-      let sheet = package.Workbook.Worksheets.[1]
+      let (-->) x y = (x, y)
 
-      // Headers
-      sheet.Cells.[2, 1].Value <- date
-      sheet.Cells.[2, 7].Value <- "田中太郎" //config.Name
+      let month =
+        let now = DateTime.Now
+        now.AddDays(float (1 - now.Day))
 
-      // Records
-      (*
-      let rec loop rowIndex =
-        sheet.Cells.[rowIndex, 3].Value <- TimeSpan(9, 30, 0)
-        sheet.Cells.[rowIndex, 4].Value <- TimeSpan(18, 30, 0)
-        sheet.Cells.[rowIndex, 5].Value <- TimeSpan(1, 0, 0)
-        sheet.Cells.[rowIndex, 7].Value <- "Note"
-      loop 5
-      //*)
+      let rows =
+        [|
+          for i in 1..31 do
+            let date = month.AddDays(float (i - 1))
+            if i < 4 then
+              yield
+                XmlTemplate.timeSheetWorkingRow |> String.replaceEach
+                  [|
+                    "{{日付}}" --> date.ToString("yyyy-MM-dd")
+                    "{{日}}" --> string date.Day
+                    "{{開始時刻}}" --> "09:30:00"
+                    "{{終了時刻}}" --> "18:30:00"
+                    "{{休憩時間}}" --> "01:00:00"
+                    "{{勤務時間}}" --> "08:00:00"
+                  |]
+            else
+              yield
+                XmlTemplate.timeSheetEmptyRow |> String.replaceEach
+                  [|
+                    "{{日付}}" --> date.ToString("yyyy-MM-dd")
+                    "{{日}}" --> string date.Day
+                  |]
+        |]
+      let xml =
+        XmlTemplate.timeSheet
+        |> String.replace "{{行}}" (rows |> String.concatWithLineBreak)
 
-      package.Save()
+      File.WriteAllText("x.xml", xml)
 
   let convertToExcel = ConvertToExcel.convertToExcel

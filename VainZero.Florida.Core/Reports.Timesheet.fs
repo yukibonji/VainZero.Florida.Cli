@@ -116,7 +116,12 @@ module TimeSheet =
         |]
       let xml =
         XmlTemplate.timeSheet
-        |> String.replace "{{行}}" (rows |> String.concatWithLineBreak)
+        |> String.replaceEach
+          [|
+            "{{日付}}" --> month.ToString("yyyy-MM-dd")
+            "{{名前}}" --> "匿名太郎"
+            "{{行}}" --> (rows |> String.concatWithLineBreak)
+          |]
 
       File.WriteAllText("x.xml", xml)
 

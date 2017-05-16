@@ -2023,10 +2023,10 @@ let timeSheet =
     ss:Span="3"/>
    <Row ss:AutoFitHeight="0" ss:Height="3.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="25.5" ss:StyleID="s426">
-    <Cell ss:MergeAcross="2" ss:StyleID="s420"><Data ss:Type="DateTime">2017-04-01T00:00:00.000</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="s420"><Data ss:Type="DateTime">{{日付}}T00:00:00.000</Data></Cell>
     <Cell ss:MergeAcross="1" ss:StyleID="s420"><Data ss:Type="String">勤務報告書</Data></Cell>
     <Cell ss:StyleID="s421"><Data ss:Type="String">氏名</Data></Cell>
-    <Cell ss:MergeAcross="5" ss:StyleID="m174956008"/>
+    <Cell ss:MergeAcross="5" ss:StyleID="m174956008"><Data ss:Type="String">{{名前}}</Data></Cell>
     <Cell ss:StyleID="s425"><Data ss:Type="String">印</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="3"/>

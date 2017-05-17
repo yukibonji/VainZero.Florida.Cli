@@ -90,6 +90,23 @@ type MemoryTimeSheetRepository() =
         dictionary |> Dictionary.addOrSet month timeSheet
       }
 
+type MemoryTimeSheetExcelRepository() =
+  let dictionary = Dictionary<DateTime, string>()
+
+  interface ITimeSheetExcelRepository with
+    override this.Open(_) =
+      ()
+
+    override this.ExistsAsync(month) =
+      async {
+        return dictionary.ContainsKey(month) 
+      }
+
+    override this.AddOrUpdateAsync(month, content) =
+      async {
+        dictionary |> Dictionary.addOrSet month content
+      }
+
 type MemoryDataContext() =
   interface IDisposable with
     override this.Dispose() = ()
@@ -106,6 +123,9 @@ type MemoryDataContext() =
 
     override val TimeSheets =
       MemoryTimeSheetRepository() :> ITimeSheetRepository
+
+    override val TimeSheetExcels =
+      MemoryTimeSheetExcelRepository() :> ITimeSheetExcelRepository
 
 type MemoryDatabase() =
   let context = new MemoryDataContext()

@@ -102,6 +102,10 @@ module DateTime =
     | (false, _) ->
       None
 
+  let toMonth (dateTime: DateTime) =
+    let date = dateTime.Date
+    date.AddDays(float (1 - date.Day))
+
 module Console =
   open System
   open Printf

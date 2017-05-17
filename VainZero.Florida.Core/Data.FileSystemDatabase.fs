@@ -180,6 +180,30 @@ type FileSystemTimeSheetRepository(root: DirectoryInfo) =
         return! File.writeAllTextAsync yaml (filePath month)
       }
 
+type FileSystemTimeSheetExcelRepository(root: DirectoryInfo) =
+  let subdirectory =
+    DirectoryInfo(Path.Combine(root.FullName, "time-sheet-excels"))
+
+  let filePath (month: DateTime) =
+    let fileName = month.ToString("yyyy-MM") + ".yaml"
+    Path.Combine(subdirectory.FullName, fileName)
+
+  do subdirectory |> DirectoryInfo.createUnlessExists
+
+  interface ITimeSheetExcelRepository with
+    override this.Open(month) =
+      Process.openFile (filePath month) |> ignore
+
+    override this.ExistsAsync(month) =
+      async {
+        return File.Exists(filePath month)
+      }
+
+    override this.AddOrUpdateAsync(month, content) =
+      async {
+        return! File.writeAllTextAsync content (filePath month)
+      }
+
 type FileSystemDataContext(root: DirectoryInfo) =
   interface IDisposable with
     override this.Dispose() = ()
@@ -196,6 +220,9 @@ type FileSystemDataContext(root: DirectoryInfo) =
 
     override val TimeSheets =
       FileSystemTimeSheetRepository(root) :> ITimeSheetRepository
+
+    override val TimeSheetExcels =
+      FileSystemTimeSheetExcelRepository(root) :> ITimeSheetExcelRepository
 
 type FileSystemDatabase(root: DirectoryInfo) =
   interface IDatabase with

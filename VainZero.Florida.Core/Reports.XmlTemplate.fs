@@ -1218,7 +1218,7 @@ let timeSheetEmptyRow =
     <Cell ss:StyleID="s434"/>
     <Cell ss:StyleID="s434" ss:Formula="=RC[-2]-(RC[-3]+RC[-1])"><Data
       ss:Type="DateTime">1899-12-31T00:00:00.000</Data></Cell>
-    <Cell ss:MergeAcross="6" ss:StyleID="m174954428"/>
+    <Cell ss:MergeAcross="6" ss:StyleID="m174954428"><Data ss:Type="String">{{備考}}</Data></Cell>
    </Row>
   """
 
@@ -1234,7 +1234,7 @@ let timeSheetWorkingRow =
     <Cell ss:StyleID="s434"><Data ss:Type="DateTime">1899-12-31T{{休憩時間}}.000</Data></Cell>
     <Cell ss:StyleID="s434" ss:Formula="=RC[-2]-(RC[-3]+RC[-1])"><Data
       ss:Type="DateTime">1899-12-31T{{勤務時間}}.000</Data></Cell>
-    <Cell ss:MergeAcross="6" ss:StyleID="m174954428"/>
+    <Cell ss:MergeAcross="6" ss:StyleID="m174954428"><Data ss:Type="String">{{備考}}</Data></Cell>
    </Row>
   """
 

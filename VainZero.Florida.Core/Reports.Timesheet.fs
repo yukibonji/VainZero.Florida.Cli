@@ -84,45 +84,104 @@ module TimeSheet =
 
   [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
   module ConvertToExcel =
-    let convertToExcel () =
-      let (-->) x y = (x, y)
+    let (-->) x y = (x, y)
 
-      let month =
-        let now = DateTime.Now
-        now.AddDays(float (1 - now.Day))
+    let month =
+      let now = DateTime.Now
+      now.AddDays(float (1 - now.Day))
 
-      let rows =
-        [|
-          for i in 1..31 do
-            let date = month.AddDays(float (i - 1))
-            if i < 4 then
-              yield
-                XmlTemplate.timeSheetWorkingRow |> String.replaceEach
-                  [|
-                    "{{日付}}" --> date.ToString("yyyy-MM-dd")
-                    "{{日}}" --> string date.Day
-                    "{{開始時刻}}" --> "09:30:00"
-                    "{{終了時刻}}" --> "18:30:00"
-                    "{{休憩時間}}" --> "01:00:00"
-                    "{{勤務時間}}" --> "08:00:00"
-                  |]
-            else
-              yield
-                XmlTemplate.timeSheetEmptyRow |> String.replaceEach
-                  [|
-                    "{{日付}}" --> date.ToString("yyyy-MM-dd")
-                    "{{日}}" --> string date.Day
-                  |]
-        |]
-      let xml =
-        XmlTemplate.timeSheet
-        |> String.replaceEach
+    type DateRow =
+      {
+        日付:
+          DateTime
+        勤務時間:
+          option<TimeSpan * TimeSpan>
+        休憩時間:
+          TimeSpan
+        備考:
+          string
+      }
+    with
+      static member Create(date, workTime, restTime, note) =
+        {
+          日付 =
+            date
+          勤務時間 =
+            workTime
+          休憩時間 =
+            restTime
+          備考 =
+            note
+        }
+
+    let dateRows (timeSheet: TimeSheet) (month: DateTime) =
+      let map = timeSheet |> Seq.map (|KeyValue|) |> Map.ofSeq
+      [|
+        for day in 1..31 do
+          let date = month.AddDays(float (day - 1))
+          match map |> Map.tryFind day with
+          | Some item ->
+            let workTime =
+              match item with
+              | { 開始時刻 = Some firstTime; 終了時刻 = Some endTime } ->
+                Some (firstTime, endTime)
+              | _ ->
+                None
+            let restTime =
+              item.休憩時間 |> Option.getOr TimeSpan.Zero
+            let note =
+              item.備考 |> Option.getOr ""
+            yield DateRow.Create(date, workTime, restTime, note)
+          | None ->
+            yield DateRow.Create(date, None, TimeSpan.Zero, "")
+      |]
+
+    let excelXmlFromDateRow (dateRow: DateRow) =
+      match dateRow.勤務時間 with
+      | Some (firstTime, endTime) ->
+        XmlTemplate.timeSheetWorkingRow |> String.replaceEach
           [|
-            "{{日付}}" --> month.ToString("yyyy-MM-dd")
-            "{{名前}}" --> "匿名太郎"
-            "{{行}}" --> (rows |> String.concatWithLineBreak)
+            "{{日付}}"
+              --> dateRow.日付.ToString("yyyy-MM-dd")
+            "{{日}}"
+              --> string dateRow.日付.Day
+            "{{開始時刻}}"
+              --> firstTime.ToString("c")
+            "{{終了時刻}}"
+              --> endTime.ToString("c")
+            "{{休憩時間}}"
+              --> dateRow.休憩時間.ToString("c")
+            "{{勤務時間}}"
+              --> (endTime - firstTime).ToString("c")
+            "{{備考}}"
+              --> dateRow.備考
+          |]
+      | None ->
+        XmlTemplate.timeSheetEmptyRow |> String.replaceEach
+          [|
+            "{{日付}}"
+              --> dateRow.日付.ToString("yyyy-MM-dd")
+            "{{日}}"
+              --> string dateRow.日付.Day
+            "{{備考}}"
+              --> dateRow.備考
           |]
 
-      File.WriteAllText("x.xml", xml)
+    let excelXml (config: Config) timeSheet month =
+      let dateRowXmls =
+        dateRows timeSheet month |> Array.map excelXmlFromDateRow |> String.concatWithLineBreak
+      XmlTemplate.timeSheet
+      |> String.replaceEach
+        [|
+          "{{日付}}"
+            --> month.ToString("yyyy-MM-dd")
+          "{{名前}}"
+            --> (config.UserName |> Option.getOr "")
+          "{{行}}"
+            --> dateRowXmls
+        |]
+
+    let convertToExcelXml (database: IDatabase) config month =
+      
 
   let convertToExcel = ConvertToExcel.convertToExcel

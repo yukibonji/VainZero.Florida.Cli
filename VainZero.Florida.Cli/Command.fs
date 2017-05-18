@@ -3,6 +3,7 @@
 open System
 open System.IO
 open FSharpKit.ErrorHandling
+open VainZero.Misc
 open VainZero.Florida
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
@@ -26,6 +27,8 @@ module Command =
       "週報をエクセル形式に変換します。"
     | Command.TimeSheetUpdate _ ->
       "勤務表を更新します。"
+    | Command.TimeSheetExcel _ ->
+      "前月の勤務表をエクセル形式に変換します。"
     | Command.DailyReportFinalize _ ->
       "日報を送信し、勤務表を更新します。"
 
@@ -49,6 +52,9 @@ module Command =
         return! WeeklyReport.convertToExcelAsync dataContext date
       | Command.TimeSheetUpdate date ->
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
+      | Command.TimeSheetExcel date ->
+        let previousMonth = (date |> DateTime.toMonth).AddMonths(-1)
+        return! TimeSheet.convertToExcelXmlAndOpenAsync dataContext config previousMonth
       | Command.DailyReportFinalize date ->
         do! DailyReport.submitAsync config notifier dataContext date
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date

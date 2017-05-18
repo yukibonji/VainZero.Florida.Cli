@@ -16,6 +16,8 @@
       of DateTime
     | TimeSheetUpdate
       of DateTime
+    | TimeSheetExcel
+      of DateTime
     /// Composite command of DailyReprotCreate and TimeSheetUpdate.
     | DailyReportFinalize
       of DateTime

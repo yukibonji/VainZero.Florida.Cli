@@ -34,12 +34,16 @@ with
 type TimeSheetArguments =
   | [<CliPrefix(CliPrefix.None)>]
     Update
+  | [<CliPrefix(CliPrefix.None)>]
+    Excel
 with
   interface IArgParserTemplate with
     override this.Usage =
       match this with
       | Update ->
         "勤務表を更新します。"
+      | Excel ->
+        "前月の勤務表をエクセルファイルに変換して開きます。"
 
 type Arguments =
   | [<CliPrefix(CliPrefix.None)>]
@@ -96,5 +100,7 @@ module Arguments =
       | Time_Sheet parseResults ->
         if parseResults.Contains(<@ TimeSheetArguments.Update @>) then
           Command.TimeSheetUpdate date
+        else if parseResults.Contains(<@ TimeSheetArguments.Excel @>) then
+          Command.TimeSheetExcel date
         else
           parseResults.Parser |> usageCommand

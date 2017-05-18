@@ -118,34 +118,34 @@ module TimeSheet =
           None
 
     type DateRow =
-      DateTime * option<WorkTime> * string
+      int * option<WorkTime> * string
 
     let dateRows (month: DateTime) (timeSheet: TimeSheet): array<DateRow> =
       let map = timeSheet |> Seq.map (|KeyValue|) |> Map.ofSeq
       [|
         for day in 1..31 do
-          let date = month.AddDays(float (day - 1))
           match map |> Map.tryFind day with
           | Some item ->
             let note = item.備考 |> Option.getOr ""
             match item |> WorkTime.ofTimeSheetItem with
             | Some workTime ->
-              yield (date, Some workTime, note)
+              yield (day, Some workTime, note)
             | None ->
-              yield (date, None, note)
+              yield (day, None, note)
           | None ->
-            yield (date, None, "")
+            yield (day, None, "")
       |]
 
-    let excelXmlFromDateRow (dateRow: DateRow) =
-      match dateRow with
-      | (date, Some workTime, note) ->
+    let excelXmlFromDateRow (month: DateTime) (day, workTime, note) =
+      let date = month.AddDays(float (day - 1))
+      match workTime with
+      | Some workTime ->
         XmlTemplate.timeSheetWorkingRow |> String.replaceEach
           [|
             "{{日付}}" -->
               date.ToString("yyyy-MM-dd")
             "{{日}}" -->
-              string date.Day
+              string day
             "{{開始時刻}}" -->
               workTime.FirstTime.ToString("c")
             "{{終了時刻}}" -->
@@ -157,13 +157,13 @@ module TimeSheet =
             "{{備考}}" -->
               note
           |]
-      | (date, None, note) ->
+      | None ->
         XmlTemplate.timeSheetEmptyRow |> String.replaceEach
           [|
             "{{日付}}" -->
               date.ToString("yyyy-MM-dd")
             "{{日}}" -->
-              string date.Day
+              string day
             "{{備考}}" -->
               note
           |]
@@ -178,7 +178,7 @@ module TimeSheet =
           "{{行}}" -->
             (
               dateRows month timeSheet
-              |> Array.map excelXmlFromDateRow
+              |> Array.map (excelXmlFromDateRow month)
               |> String.concatWithLineBreak
             )
         |]

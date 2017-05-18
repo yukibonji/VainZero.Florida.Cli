@@ -185,7 +185,7 @@ type FileSystemTimeSheetExcelRepository(root: DirectoryInfo) =
     DirectoryInfo(Path.Combine(root.FullName, "time-sheet-excels"))
 
   let filePath (month: DateTime) =
-    let fileName = month.ToString("yyyy-MM") + ".yaml"
+    let fileName = month.ToString("yyyy-MM") + ".xml"
     Path.Combine(subdirectory.FullName, fileName)
 
   do subdirectory |> DirectoryInfo.createUnlessExists

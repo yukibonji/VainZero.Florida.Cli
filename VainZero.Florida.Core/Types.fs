@@ -192,6 +192,11 @@ namespace VainZero.Florida.Data
     abstract FindAsync: month: DateTime -> Async<option<TimeSheet>>
     abstract AddOrUpdateAsync: month: DateTime * TimeSheet -> Async<unit>
 
+  type ITimeSheetExcelRepository =
+    abstract Open: month: DateTime -> unit
+    abstract ExistsAsync: month: DateTime -> Async<bool>
+    abstract AddOrUpdateAsync: month: DateTime * content: string -> Async<unit>
+
   type IDataContext =
     inherit IDisposable
 
@@ -199,6 +204,7 @@ namespace VainZero.Florida.Data
     abstract WeeklyReports: IWeeklyReportRepository
     abstract WeeklyReportExcels: IWeeklyReportExcelRepository
     abstract TimeSheets: ITimeSheetRepository
+    abstract TimeSheetExcels: ITimeSheetExcelRepository
 
   type IDatabase =
     abstract Connect: unit -> IDataContext

@@ -39,3 +39,27 @@ module Config =
       | e ->
         return! exn("設定ファイルが見つからないか、解析に失敗しました。", e) |> raise
     }
+
+  let internal test =
+    {
+      RootDirectory =
+        "data"
+      Department =
+        Some "Testing Deparment"
+      UserName =
+        Some "John Doe"
+      WeeklyReportConfig =
+        {
+          MeetingDay =
+            DayOfWeek.Monday
+        }
+      DailyReportSubmitConfig =
+        None
+      TimeSheetConfig =
+        {
+          DefaultFirstTime =
+            TimeSpan(9, 0, 0)
+          DefaultRecess =
+            TimeSpan(1, 0, 0)
+        }
+    }

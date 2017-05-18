@@ -49,6 +49,7 @@
     <Compile Include="Collections.fs" />
     <Compile Include="Text.Tests.fs" />
     <Compile Include="Misc.Yaml.Tests.fs" />
+    <Compile Include="Reports.TimeSheet.Tests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VainZero.Florida.Core\VainZero.Florida.Core.fsproj">

@@ -42,6 +42,7 @@ module Command =
         ()
       | Command.Usage usage ->
         printUsage usage
+        Console.ReadKey(intercept = true) |> ignore
       | Command.DailyReportCreate date ->
         do! DailyReport.scaffoldAsync dataContext date
       | Command.DailyReportSendMail date ->

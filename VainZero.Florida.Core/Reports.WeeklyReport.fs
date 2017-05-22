@@ -161,8 +161,6 @@ module WeeklyReport =
   let generateAsync = GenerateFromDailyReports.generateAsync
 
   module private ConvertToExcelXml =
-    let (-->) x y = (x, y)
-
     type DayRow =
       {
         Date:

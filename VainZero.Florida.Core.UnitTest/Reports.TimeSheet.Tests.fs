@@ -11,8 +11,6 @@ module ``test TimeSheet`` =
   module ``test ConvertToExcelXml`` =
     open TimeSheet.ConvertToExcelXml
 
-    let (-->) x y = (x, y)
-
     [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     module TimeSheetItem =
       let regular =

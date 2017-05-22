@@ -83,8 +83,6 @@ module TimeSheet =
 
   [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
   module ConvertToExcelXml =
-    let (-->) x y = (x, y)
-
     type WorkTime =
       {
         FirstTime:

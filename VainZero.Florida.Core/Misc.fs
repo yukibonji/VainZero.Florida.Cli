@@ -9,6 +9,8 @@ module Operators =
   let fold (xs: seq<'x>) (f: 'x -> 's -> 's) (s: 's): 's =
     xs |> Seq.fold (fun s x -> f x s) s
 
+  let (-->) x y = (x, y)
+
 module Option =
   let getOr x =
     function

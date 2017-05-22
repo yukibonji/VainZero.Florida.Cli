@@ -225,22 +225,22 @@ module WeeklyReport =
         weeklyReport
         |> String.replaceEach
             [|
-              "{{所属部署}}"
-                --> wr.担当者.所属部署
-              "{{担当者名}}"
-                --> wr.担当者.名前
-              "{{今週活動}}"
-                --> (wr.今週の主な活動 |> Xml.escape)
-              "{{進捗}}"
-                --> (wr.進捗 |> Xml.escape)
-              "{{日別の内容}}"
-                --> dailyWorkXml
-              "{{今週実績}}"
-                --> (wr.今週実績 |> Xml.escape)
-              "{{来週予定}}"
-                --> (wr.来週予定 |> Xml.escape)
-              "{{その他}}"
-                --> (wr.その他 |> Xml.escape)
+              "{{所属部署}}" -->
+                wr.担当者.所属部署
+              "{{担当者名}}" -->
+                wr.担当者.名前
+              "{{今週活動}}" -->
+                (wr.今週の主な活動 |> Xml.escape)
+              "{{進捗}}" -->
+                (wr.進捗 |> Xml.escape)
+              "{{日別の内容}}" -->
+                dailyWorkXml
+              "{{今週実績}}" -->
+                (wr.今週実績 |> Xml.escape)
+              "{{来週予定}}" -->
+                (wr.来週予定 |> Xml.escape)
+              "{{その他}}" -->
+                (wr.その他 |> Xml.escape)
             |]
       xml
 

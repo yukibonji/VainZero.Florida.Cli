@@ -28,9 +28,9 @@ type MemoryDailyReportRepository() =
       async {
         match dictionary.TryGetValue(date) with
         | (true, value) ->
-          return Ok value
+          return ParsableEntry value |> Ok
         | (false, _) ->
-          return KeyNotFoundException() :> exn |> Error
+          return UnexistingParsableEntry |> Ok
       }
 
     override this.FirstDateAsync =

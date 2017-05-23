@@ -60,7 +60,7 @@ module TimeSheet =
     async {
       let! report = dataContext.DailyReports.FindAsync(date)
       match report with
-      | Ok (_, report) ->
+      | Ok (ParsableEntry (_, report)) ->
         let item = TimeSheetItem.fromDailyReport config report
         let! timeSheet = dataContext.TimeSheets.FindAsync(date)
         let timeSheet =
@@ -69,16 +69,12 @@ module TimeSheet =
           |> update date.Day item
         do! dataContext.TimeSheets.AddOrUpdateAsync(date, timeSheet)
         return Ok ()
+      | Ok (UnparsableEntry (_, e)) ->
+        return sprintf "日報を解析できません: %s" e.Message |> Error
+      | Ok UnexistingParsableEntry ->
+        return "勤務表の更新には日報が必要です。" |> Error
       | Error e ->
-        let error =
-          match e with
-          | :? FsYaml.FsYamlException as e ->
-            sprintf "日報を解析できません: %s" e.Message
-          | :? FileNotFoundException ->
-            "勤務表の更新には日報が必要です。"
-          | e ->
-            e |> string
-        return Error error
+        return e |> string |> Error
     }
 
   [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]

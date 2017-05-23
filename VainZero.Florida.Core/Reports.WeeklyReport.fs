@@ -60,9 +60,9 @@ module WeeklyReport =
                 let! report = dataContext.DailyReports.FindAsync(date)
                 return
                   match report with
-                  | Ok (_, report) ->
+                  | Ok (ParsableEntry (_, report)) ->
                     Some (date, report)
-                  | Error _ ->
+                  | _ ->
                     None
               }
             )

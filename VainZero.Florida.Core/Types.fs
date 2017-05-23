@@ -164,9 +164,16 @@ namespace VainZero.Florida.Data
   open VainZero.Florida
   open VainZero.Florida.Reports
 
+  type ParsableEntry<'TSource, 'TTarget> =
+    | ParsableEntry
+      of 'TSource * 'TTarget
+    | UnparsableEntry
+      of 'TSource * exn
+    | UnexistingParsableEntry
+
   type IDailyReportRepository =
     abstract Open: DateTime -> unit
-    abstract FindAsync: DateTime -> Async<Result<string * DailyReport, exn>>
+    abstract FindAsync: DateTime -> Async<Result<ParsableEntry<string, DailyReport>, exn>>
 
     /// 指定された日付の日報の雛形を生成する。
     abstract ScaffoldAsync: DateTime -> Async<unit>

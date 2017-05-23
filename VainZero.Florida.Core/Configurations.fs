@@ -45,7 +45,7 @@ module Config =
       RootDirectory =
         "data"
       Department =
-        Some "Testing Deparment"
+        Some "Testing Department"
       UserName =
         Some "John Doe"
       WeeklyReportConfig =

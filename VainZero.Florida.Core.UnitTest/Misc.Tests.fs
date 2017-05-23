@@ -18,3 +18,25 @@ module ``test String`` =
       do! case "ab" 3 0 None
       do! case "ab" 3 (-1) None
     }
+
+  let ``test indentEachLine`` =
+    test {
+      let case str expected =
+        test {
+          do! str |> String.indentEachLine 2 |> is expected
+          do!
+            str.Replace("\n", "\r\n") |> String.indentEachLine 2
+            |> is (expected.Replace("\n", "\r\n"))
+        }
+      // The first line should be indented if not empty.
+      do! case "" ""
+      do! case "\n" "\n"
+      do! case "1" "  1"
+      do! case "  1" "    1"
+      // Nonempty lines after linebreaks should be indented.
+      do! case "\n1" "\n  1"
+      // All lines should be indented.
+      do! case "1\n2" "  1\n  2"
+      // Empty lines after linebreaks should not be indented.
+      do! case "\n\n1" "\n\n  1"
+    }

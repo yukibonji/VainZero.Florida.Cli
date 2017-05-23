@@ -48,6 +48,7 @@
     <Compile Include="Misc.Tests.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="Text.Tests.fs" />
+    <Compile Include="Text.StructuralTextWriter.Tests.fs" />
     <Compile Include="Misc.Yaml.Tests.fs" />
     <Compile Include="Reports.TimeSheet.Tests.fs" />
   </ItemGroup>

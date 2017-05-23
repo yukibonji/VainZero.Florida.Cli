@@ -66,6 +66,7 @@
     <Compile Include="Collections.fs" />
     <Compile Include="IO.FileSystem.fs" />
     <Compile Include="Text.fs" />
+    <Compile Include="Text.StructuralTextWriter.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Misc.Yaml.fs" />
     <Compile Include="Configurations.fs" />

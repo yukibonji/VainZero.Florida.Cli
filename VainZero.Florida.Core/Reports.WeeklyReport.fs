@@ -255,9 +255,8 @@ module WeeklyReport =
         let excelXml = weeklyReport |> toExcelXml
         do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
         dataContext.WeeklyReportExcels.Open(dateRange)
-        return Ok ()
       | UnparsableEntry (_, e) ->
-        return sprintf "週報の解析に失敗しました: %s" e.Message |> Error
+        return exn("週報の解析に失敗しました。", e) |> raise
       | UnexistingParsableEntry ->
-        return "エクセルファイルに変換する対象の週報がありません。" |> Error
+        return "エクセルファイルに変換する対象の週報がありません。" |> failwith
     }

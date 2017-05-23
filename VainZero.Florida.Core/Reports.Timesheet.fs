@@ -68,11 +68,10 @@ module TimeSheet =
           |> Option.getOrElse (fun () -> create date)
           |> update date.Day item
         do! dataContext.TimeSheets.AddOrUpdateAsync(date, timeSheet)
-        return Ok ()
       | UnparsableEntry (_, e) ->
-        return sprintf "日報を解析できません: %s" e.Message |> Error
+        return! exn("日報を解析できません。", e) |> raise
       | UnexistingParsableEntry ->
-        return "勤務表の更新には日報が必要です。" |> Error
+        return! "勤務表の更新には日報が必要です。" |> failwith
     }
 
   [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -181,16 +180,15 @@ module TimeSheet =
         match timeSheet with
         | Some timeSheet ->
           let xml = excelXml config month timeSheet
-          do! dataContext.TimeSheetExcels.AddOrUpdateAsync(month, xml)
-          return Result.Ok ()
+          return! dataContext.TimeSheetExcels.AddOrUpdateAsync(month, xml)
         | None ->
-          return Result.Error (sprintf "%d月分の勤務表がありません。" month.Month)
+          return! sprintf "%d月分の勤務表がありません。" month.Month |> failwith
       }
 
   let convertToExcelXmlAsync = ConvertToExcelXml.convertToExcelXmlAsync
 
   let convertToExcelXmlAndOpenAsync (dataContext: IDataContext) config month =
-    AsyncResult.build {
+    async {
       do! convertToExcelXmlAsync dataContext config month
       dataContext.TimeSheetExcels.Open(month)
     }

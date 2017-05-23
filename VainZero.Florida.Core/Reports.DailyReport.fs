@@ -106,13 +106,12 @@ module DailyReport =
           if (notifier: INotifier).Confirm(confirmationMessage) then
             let password = password submitConfig
             submit submitConfig destinations subject content password
-          return Ok ()
         | (UnparsableEntry (_, e), _) ->
-          return sprintf "日報の解析に失敗しました: %s" e.Message |> Error
+          return! exn("日報の解析に失敗しました。", e) |> raise
         | (UnexistingParsableEntry, _) ->
-          return "日報がありません。" |> Error
+          return! "日報がありません。" |> failwith
         | (_, None) ->
-          return "日報のメール送信の設定がありません。" |> Error
+          return! "日報のメール送信の設定がありません。" |> failwith
       }
 
   let submitAsync = Submit.submitAsync

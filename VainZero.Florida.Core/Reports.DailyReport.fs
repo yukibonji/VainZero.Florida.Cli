@@ -65,20 +65,19 @@ module DailyReport =
 
     /// 送信前の確認メッセージを構築する。
     let confirmationMessage (message: MailMessage) =
-      let stringifyAddresses ss =
-        "[" + (ss |> Seq.map string |> String.concat "; ") + "]"
-      sprintf """
-以下の設定で日報を送信します:
-  TO: %s
-  CC: %s
-  BCC: %s
-  本文: |
-%s
-"""
-        (stringifyAddresses message.Destination.Tos)
-        (stringifyAddresses message.Destination.CCs)
-        (stringifyAddresses message.Destination.Bccs)
-        message.Body
+      use stringWriter = new StringWriter()
+      let writer = StructuralTextWriter(stringWriter)
+      writer.WriteLine("以下の設定で日報を送信します:")
+      let () =
+        use indentation = writer.AddIndent()
+        let stringFromSeq xs = "[" + (xs |> Seq.map string |> String.concat "; ") + "]"
+        writer.WriteLine("TO: " + stringFromSeq message.Destination.Tos)
+        writer.WriteLine("CC: " + stringFromSeq message.Destination.CCs)
+        writer.WriteLine("BCC: " + stringFromSeq message.Destination.Bccs)
+        writer.WriteLine("本文: |")
+        use indentation = writer.AddIndent()
+        writer.WriteLine(message.Body)
+      stringWriter.ToString() + "よろしいですか？"
 
     let password (submitConfig: DailyReportSubmitConfig) =
       submitConfig.Password |> Option.getOrElse

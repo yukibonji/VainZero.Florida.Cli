@@ -60,9 +60,10 @@ module WeeklyReport =
                 let! report = dataContext.DailyReports.FindAsync(date)
                 return
                   match report with
-                  | Ok (ParsableEntry (_, report)) ->
+                  | ParsableEntry (_, report) ->
                     Some (date, report)
-                  | _ ->
+                  | UnparsableEntry _
+                  | UnexistingParsableEntry ->
                     None
               }
             )
@@ -250,15 +251,13 @@ module WeeklyReport =
       let! dateRange = dateRangeFromDateAsync dataContext date
       let! weeklyReport = dataContext.WeeklyReports.FindAsync(dateRange)
       match weeklyReport with
-      | Ok (ParsableEntry (_, weeklyReport)) ->
+      | ParsableEntry (_, weeklyReport) ->
         let excelXml = weeklyReport |> toExcelXml
         do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
         dataContext.WeeklyReportExcels.Open(dateRange)
         return Ok ()
-      | Ok (UnparsableEntry (_, e)) ->
+      | UnparsableEntry (_, e) ->
         return sprintf "週報の解析に失敗しました: %s" e.Message |> Error
-      | Ok UnexistingParsableEntry ->
+      | UnexistingParsableEntry ->
         return "エクセルファイルに変換する対象の週報がありません。" |> Error
-      | Error e ->
-        return e |> string |> Error
     }

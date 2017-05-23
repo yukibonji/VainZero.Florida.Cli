@@ -19,16 +19,18 @@ module File =
       return! stream.ReadToEndAsync() |> Async.AwaitTask
     }
 
+  /// Tries to open a text file (utf-8) and read the content asynchronously.
+  /// Returns None if the file not found.
   let tryReadAllTextAsync (filePath: string) =
     async {
       try
         if File.Exists(filePath) then
           let! content = readAllTextAsync filePath
-          return Ok content
+          return Some content
         else
-          let message = sprintf "File not found: '%s'." filePath
-          return FileNotFoundException(message, filePath) :> exn |> Error
+          return None
       with
-      | e ->
-        return e |> Error
+      | :? FileNotFoundException
+      | :? DirectoryNotFoundException ->
+        return None
     }

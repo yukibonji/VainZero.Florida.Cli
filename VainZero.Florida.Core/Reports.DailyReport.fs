@@ -98,7 +98,7 @@ module DailyReport =
         let! report = (dataContext: IDataContext).DailyReports.FindAsync(date)
         let submitConfig = config.DailyReportSubmitConfig
         match (report, submitConfig) with
-        | (Ok (ParsableEntry (yaml, report)), Some submitConfig) ->
+        | (ParsableEntry (yaml, report), Some submitConfig) ->
           let destinations = destinations submitConfig report
           let subject = subject submitConfig date
           let content = content submitConfig yaml
@@ -107,12 +107,10 @@ module DailyReport =
             let password = password submitConfig
             submit submitConfig destinations subject content password
           return Ok ()
-        | (Ok (UnparsableEntry (_, e)), _) ->
+        | (UnparsableEntry (_, e), _) ->
           return sprintf "日報の解析に失敗しました: %s" e.Message |> Error
-        | (Ok UnexistingParsableEntry, _) ->
+        | (UnexistingParsableEntry, _) ->
           return "日報がありません。" |> Error
-        | (Error e, _) ->
-          return e |> string |> Error
         | (_, None) ->
           return "日報のメール送信の設定がありません。" |> Error
       }

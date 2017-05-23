@@ -21,11 +21,10 @@ module Config =
 
   let private loadOrCreateAsync () =
     async {
-      let! yaml = File.tryReadAllTextAsync configPath
-      match yaml with
-      | Ok yaml ->
-        return yaml
-      | Error _ ->
+      try
+        return! File.readAllTextAsync configPath
+      with
+      | _ ->
         createFromTemplate ()
         return! File.readAllTextAsync configPath
     }

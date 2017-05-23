@@ -49,9 +49,10 @@ type MemoryWeeklyReportRepository() =
       async {
         match dictionary.TryGetValue(dateRange) with
         | (true, report) ->
-          return Ok report
+          let yaml = Yaml.myDump report
+          return ParsableEntry (yaml, report) |> Ok
         | (false, _) ->
-          return KeyNotFoundException() :> exn |> Error
+          return UnexistingParsableEntry |> Ok
       }
 
     override this.AddOrUpdateAsync(dateRange, report) =

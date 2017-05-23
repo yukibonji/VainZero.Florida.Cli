@@ -183,7 +183,7 @@ namespace VainZero.Florida.Data
 
   type IWeeklyReportRepository =
     abstract Open: DateRange -> unit
-    abstract FindAsync: DateRange -> Async<Result<WeeklyReport, exn>>
+    abstract FindAsync: DateRange -> Async<Result<ParsableEntry<string, WeeklyReport>, exn>>
     abstract AddOrUpdateAsync: DateRange * WeeklyReport -> Async<unit>
 
     /// 指定された日付より前にある週報のうち最新のものの、日付の区間を取得する。

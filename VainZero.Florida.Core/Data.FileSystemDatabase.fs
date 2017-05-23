@@ -104,9 +104,19 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
       Process.openFile (filePath dateRange) |> ignore
 
     override this.FindAsync(dateRange) =
-      AsyncResult.build {
+      async {
         let! yaml = File.tryReadAllTextAsync (filePath dateRange)
-        return! Yaml.tryMyLoad<WeeklyReport> yaml |> AsyncResult.ofResult
+        match yaml with
+        | Ok yaml ->
+          match Yaml.tryMyLoad<WeeklyReport> yaml with
+          | Ok report ->
+            return ParsableEntry (yaml, report) |> Ok
+          | Error e ->
+            return UnparsableEntry (yaml, e) |> Ok
+        | Error (:? FileNotFoundException) ->
+          return Ok UnexistingParsableEntry
+        | Error e ->
+          return Error e
       }
 
     override this.AddOrUpdateAsync(dateRange, report) =

@@ -216,6 +216,40 @@ namespace VainZero.Florida.Data
   type IDatabase =
     abstract Connect: unit -> IDataContext
 
+namespace VainZero.Florida.Net.Mail
+  open VainZero.Florida
+  open System.Net
+  open System.Threading.Tasks
+
+  type SmtpServer =
+    Configurations.SmtpServer
+
+  type MailAddress =
+    System.Net.Mail.MailAddress
+
+  type MailDestination
+    ( tos: array<MailAddress>
+    , ccs: array<MailAddress>
+    , bccs: array<MailAddress>
+    ) =
+    member this.Tos = tos
+    member this.CCs = ccs
+    member this.Bccs = bccs
+
+  type MailMessage
+    ( sender: MailAddress
+    , subject: string
+    , body: string
+    , destination: MailDestination
+    ) =
+    member this.Sender = sender
+    member this.Subject = subject
+    member this.Body = body
+    member this.Destination = destination
+
+  type ISmtpService =
+    abstract SendAsync: SmtpServer * NetworkCredential * MailMessage -> Async<unit>
+
 namespace VainZero.Florida.UI.Notifications
 
   type INotifier =

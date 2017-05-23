@@ -2,15 +2,15 @@
 
 open System
 open System.IO
-open System.Net.Mail
+open System.Net
 open FSharpKit.ErrorHandling
 open VainZero.Collections
 open VainZero.Misc
-open VainZero.Net
 open VainZero.Text
 open FsYaml
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
+open VainZero.Florida.Net.Mail
 open VainZero.Florida.UI.Notifications
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -38,17 +38,17 @@ module DailyReport =
     }
 
   module internal Submit =
-    let destinations (submitConfig: DailyReportSubmitConfig) (report: DailyReport) =
+    let destination (submitConfig: DailyReportSubmitConfig) (report: DailyReport) =
       let tos =
-        submitConfig.To |> Array.map MailAddress.ofString
+        submitConfig.To |> Array.map MailAddress
       let ccs =
         Array.append
           submitConfig.CC
           (report.CC |> Option.getOr Array.empty)
-        |> Array.map MailAddress.ofString
+        |> Array.map MailAddress
       let bccs = 
-        submitConfig.Bcc |> Array.map MailAddress.ofString
-      (tos, ccs, bccs)
+        submitConfig.Bcc |> Array.map MailAddress
+      MailDestination(tos, ccs, bccs)
 
     let subject (submitConfig: DailyReportSubmitConfig) (date: DateTime) =
       sprintf "[日報] %d/%d %s" date.Month date.Day submitConfig.SenderName
@@ -64,9 +64,9 @@ module DailyReport =
       |> String.concatWithLineBreak
 
     /// 送信前の確認メッセージを構築する。
-    let confirmationMessage (tos, ccs, bccs) content =
+    let confirmationMessage (message: MailMessage) =
       let stringifyAddresses ss =
-        "[" + (ss |> Seq.map MailAddress.nameAddress |> String.concat "; ") + "]"
+        "[" + (ss |> Seq.map string |> String.concat "; ") + "]"
       sprintf """
 以下の設定で日報を送信します:
   TO: %s
@@ -75,10 +75,10 @@ module DailyReport =
   本文: |
 %s
 """
-        (stringifyAddresses tos)
-        (stringifyAddresses ccs)
-        (stringifyAddresses bccs)
-        content
+        (stringifyAddresses message.Destination.Tos)
+        (stringifyAddresses message.Destination.CCs)
+        (stringifyAddresses message.Destination.Bccs)
+        message.Body
 
     let password (submitConfig: DailyReportSubmitConfig) =
       submitConfig.Password |> Option.getOrElse
@@ -87,25 +87,22 @@ module DailyReport =
           Console.ReadLine() // TODO: INotifier 経由で起動する。
         )
 
-    let submit submitConfig destinations subject content password =
-      let server = (submitConfig: DailyReportSubmitConfig).SmtpServer
-      use smtpClient = SmtpClient.create server.Name server.Port submitConfig.SenderAddress password
-      let sender = MailAddress(submitConfig.SenderAddress, submitConfig.SenderName)
-      smtpClient |> SmtpClient.send sender destinations subject content
-
-    let submitAsync (config: Config) (notifier: INotifier) dataContext date =
+    let submitAsync config notifier dataContext smtpService date =
       async {
         let! report = (dataContext: IDataContext).DailyReports.FindAsync(date)
-        let submitConfig = config.DailyReportSubmitConfig
+        let submitConfig = (config: Config).DailyReportSubmitConfig
         match (report, submitConfig) with
         | (ParsableEntry (yaml, report), Some submitConfig) ->
-          let destinations = destinations submitConfig report
+          let server = submitConfig.SmtpServer
+          let sender = MailAddress(submitConfig.SenderAddress, submitConfig.SenderName)
           let subject = subject submitConfig date
           let content = content submitConfig yaml
-          let confirmationMessage = confirmationMessage destinations content
-          if (notifier: INotifier).Confirm(confirmationMessage) then
+          let destination = destination submitConfig report
+          let message = MailMessage(sender, subject, content, destination)
+          if (notifier: INotifier).Confirm(confirmationMessage message) then
             let password = password submitConfig
-            submit submitConfig destinations subject content password
+            let credential = NetworkCredential(submitConfig.SenderAddress, password)
+            do! (smtpService: ISmtpService).SendAsync(server, credential, message)
         | (UnparsableEntry (_, e), _) ->
           return! exn("日報の解析に失敗しました。", e) |> raise
         | (UnexistingParsableEntry, _) ->

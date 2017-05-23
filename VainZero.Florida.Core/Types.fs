@@ -255,3 +255,4 @@ namespace VainZero.Florida.UI.Notifications
   type INotifier =
     abstract NotifyWarning: string -> unit
     abstract Confirm: string -> bool
+    abstract GetPassword: string -> string

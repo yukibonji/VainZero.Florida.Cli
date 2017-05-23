@@ -1,5 +1,6 @@
 ﻿namespace VainZero.Florida.UI.Notifications
 
+open System
 open VainZero.Misc
 
 type ConsoleNotifier() =
@@ -9,3 +10,7 @@ type ConsoleNotifier() =
 
     override this.Confirm(message) =
       Console.readYesNo message
+
+    override this.GetPassword(message) =
+      printf "%s: " message
+      Console.ReadLine()

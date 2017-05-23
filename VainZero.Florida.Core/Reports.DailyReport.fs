@@ -79,12 +79,9 @@ module DailyReport =
         writer.WriteLine(message.Body)
       stringWriter.ToString() + "よろしいですか？"
 
-    let password (submitConfig: DailyReportSubmitConfig) =
+    let password (submitConfig: DailyReportSubmitConfig) notifier =
       submitConfig.Password |> Option.getOrElse
-        (fun () ->
-          printf "Password: "
-          Console.ReadLine() // TODO: INotifier 経由で起動する。
-        )
+        (fun () -> (notifier: INotifier).GetPassword("メールアカウントのパスワード"))
 
     let submitAsync config notifier dataContext smtpService date =
       async {
@@ -99,7 +96,7 @@ module DailyReport =
           let destination = destination submitConfig report
           let message = MailMessage(sender, subject, content, destination)
           if (notifier: INotifier).Confirm(confirmationMessage message) then
-            let password = password submitConfig
+            let password = password submitConfig notifier
             let credential = NetworkCredential(submitConfig.SenderAddress, password)
             do! (smtpService: ISmtpService).SendAsync(server, credential, message)
         | (UnparsableEntry (_, e), _) ->

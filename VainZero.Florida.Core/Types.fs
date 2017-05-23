@@ -164,9 +164,16 @@ namespace VainZero.Florida.Data
   open VainZero.Florida
   open VainZero.Florida.Reports
 
+  type ParsableEntry<'TSource, 'TTarget> =
+    | ParsableEntry
+      of 'TSource * 'TTarget
+    | UnparsableEntry
+      of 'TSource * exn
+    | UnexistingParsableEntry
+
   type IDailyReportRepository =
     abstract Open: DateTime -> unit
-    abstract FindAsync: DateTime -> Async<Result<string * DailyReport, exn>>
+    abstract FindAsync: DateTime -> Async<ParsableEntry<string, DailyReport>>
 
     /// 指定された日付の日報の雛形を生成する。
     abstract ScaffoldAsync: DateTime -> Async<unit>
@@ -176,7 +183,7 @@ namespace VainZero.Florida.Data
 
   type IWeeklyReportRepository =
     abstract Open: DateRange -> unit
-    abstract FindAsync: DateRange -> Async<Result<WeeklyReport, exn>>
+    abstract FindAsync: DateRange -> Async<ParsableEntry<string, WeeklyReport>>
     abstract AddOrUpdateAsync: DateRange * WeeklyReport -> Async<unit>
 
     /// 指定された日付より前にある週報のうち最新のものの、日付の区間を取得する。

@@ -98,7 +98,7 @@ module DailyReport =
         let! report = (dataContext: IDataContext).DailyReports.FindAsync(date)
         let submitConfig = config.DailyReportSubmitConfig
         match (report, submitConfig) with
-        | (Ok (yaml, report), Some submitConfig) ->
+        | (ParsableEntry (yaml, report), Some submitConfig) ->
           let destinations = destinations submitConfig report
           let subject = subject submitConfig date
           let content = content submitConfig yaml
@@ -106,20 +106,12 @@ module DailyReport =
           if (notifier: INotifier).Confirm(confirmationMessage) then
             let password = password submitConfig
             submit submitConfig destinations subject content password
-          return Ok ()
-        | (Error e, _) ->
-          let error =
-            match e with
-            | :? FsYaml.FsYamlException as e ->
-              sprintf "日報の解析に失敗しました: %s" e.Message
-            | :? FileNotFoundException
-            | :? DirectoryNotFoundException ->
-              "日報がありません。"
-            | _ ->
-              e |> string
-          return Error error
+        | (UnparsableEntry (_, e), _) ->
+          return! exn("日報の解析に失敗しました。", e) |> raise
+        | (UnexistingParsableEntry, _) ->
+          return! "日報がありません。" |> failwith
         | (_, None) ->
-          return "日報のメール送信の設定がありません。" |> Error
+          return! "日報のメール送信の設定がありません。" |> failwith
       }
 
   let submitAsync = Submit.submitAsync

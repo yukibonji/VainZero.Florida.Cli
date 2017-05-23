@@ -48,9 +48,14 @@ module Program =
         let database = FileSystemDatabase(DirectoryInfo(config.RootDirectory)) :> IDatabase
         use dataContext = database.Connect()
         let! command = createCommandAsync config dataContext args
-        return! Command.executeAsync config notifier dataContext command
+        do! Command.executeAsync config notifier dataContext command
+        return Ok ()
       with
       | e ->
+        eprintfn "ERROR:"
+        eprintfn "%s" (e |> string)
+        if args |> Array.isEmpty then
+          Console.ReadKey() |> ignore
         return e |> string |> Error
     }
 
@@ -60,8 +65,4 @@ module Program =
     | Ok () ->
       0 // success
     | Error error ->
-      eprintfn "ERROR:"
-      eprintfn "%s" error
-      if args |> Array.isEmpty then
-        Console.ReadKey() |> ignore
       1 // error

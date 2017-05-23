@@ -36,7 +36,7 @@ module Command =
     printfn "%s" usage
 
   let executeAsync config notifier dataContext command =
-    AsyncResult.build {
+    async {
       match command with
       | Command.Empty ->
         ()
@@ -44,11 +44,11 @@ module Command =
         printUsage usage
         Console.ReadKey(intercept = true) |> ignore
       | Command.DailyReportCreate date ->
-        do! DailyReport.scaffoldAsync dataContext date
+        return! DailyReport.scaffoldAsync dataContext date
       | Command.DailyReportSendMail date ->
         return! DailyReport.submitAsync config notifier dataContext date
       | Command.WeeklyReportCreate date ->
-        do! WeeklyReport.generateAsync config dataContext date
+        return! WeeklyReport.generateAsync config dataContext date
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
       | Command.TimeSheetUpdate date ->
@@ -66,7 +66,7 @@ module Command =
       let! dailyReport = dataContext.DailyReports.FindAsync(date)
 
       // 日報がまだなければ、日報の生成をおすすめする。
-      if dailyReport |> Result.isError then
+      if dailyReport = UnexistingParsableEntry then
         return Command.DailyReportCreate date |> Some
 
       // 終業が近ければ、日報の送信と勤務表の更新をおすすめする。
@@ -78,9 +78,10 @@ module Command =
         let! dateRange = WeeklyReport.dateRangeFromDateAsync dataContext date
         let! report = dataContext.WeeklyReports.FindAsync dateRange
         match report with
-        | Error (:? FileNotFoundException) ->
+        | UnexistingParsableEntry ->
           return Command.WeeklyReportCreate date |> Some
-        | _ ->
+        | ParsableEntry _
+        | UnparsableEntry _ ->
           return Command.WeeklyReportConvertToExcel date |> Some
       else
         return None

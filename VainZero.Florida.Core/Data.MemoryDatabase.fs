@@ -11,7 +11,9 @@ open VainZero.Florida.Misc
 open VainZero.Florida.Reports
 
 type MemoryDailyReportRepository() =
-  let dictionary = Dictionary<DateTime, string * DailyReport>()
+  let dictionary = Dictionary<DateTime, ParsableEntry<string, DailyReport>>()
+
+  member this.Dictionary = dictionary
 
   interface IDailyReportRepository with
     override this.Open(_) =
@@ -21,14 +23,14 @@ type MemoryDailyReportRepository() =
       async {
         let dailyReport = DailyReport.empty
         let yaml = Yaml.myDump dailyReport
-        dictionary.[date] <- (yaml, dailyReport)
+        dictionary.[date] <- ParsableEntry (yaml, dailyReport)
       }
 
     override this.FindAsync(date) =
       async {
         match dictionary.TryGetValue(date) with
         | (true, value) ->
-          return ParsableEntry value
+          return value
         | (false, _) ->
           return UnexistingParsableEntry
       }

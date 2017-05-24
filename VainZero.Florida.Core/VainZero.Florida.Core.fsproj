@@ -65,8 +65,8 @@
     <Compile Include="Misc.Date.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="IO.FileSystem.fs" />
-    <Compile Include="Net.fs" />
     <Compile Include="Text.fs" />
+    <Compile Include="Text.StructuralTextWriter.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Misc.Yaml.fs" />
     <Compile Include="Configurations.fs" />
@@ -77,6 +77,7 @@
     <Compile Include="Reports.Timesheet.fs" />
     <Compile Include="Data.FileSystemDatabase.fs" />
     <Compile Include="Data.MemoryDatabase.fs" />
+    <Compile Include="Net.Mail.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -24,6 +24,7 @@ module Option =
 
 module String =
   open System
+  open System.Text
 
   let contains (infix: string) (s: string): bool =
     s.Contains(infix)
@@ -44,6 +45,25 @@ module String =
     if index >= 0 && count >= 0 && index + count <= str.Length
     then str.Substring(index, count) |> Some
     else None
+
+  let indentEachLine depth (s: string) =
+    if depth < 0 then ArgumentOutOfRangeException("depth") |> raise
+    if depth = 0 then
+      s
+    else
+      let indentation = String(' ', depth)
+      let sb = StringBuilder()
+      let rec loop canIndent i =
+        if i < s.Length then
+          if s.[i] = '\r' || s.[i] = '\n' then
+            sb.Append(s.[i]) |> ignore
+            loop true (i + 1)
+          else
+            if canIndent then sb.Append(indentation) |> ignore
+            sb.Append(s.[i]) |> ignore
+            loop false (i + 1)
+      loop true 0
+      sb.ToString()
 
 module DayOfWeek =
   open System

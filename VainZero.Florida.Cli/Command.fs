@@ -35,7 +35,7 @@ module Command =
   let printUsage usage =
     printfn "%s" usage
 
-  let executeAsync config notifier dataContext command =
+  let executeAsync config notifier dataContext smtpService command =
     async {
       match command with
       | Command.Empty ->
@@ -46,7 +46,7 @@ module Command =
       | Command.DailyReportCreate date ->
         return! DailyReport.scaffoldAsync dataContext date
       | Command.DailyReportSendMail date ->
-        return! DailyReport.submitAsync config notifier dataContext date
+        return! DailyReport.submitAsync config notifier dataContext smtpService date
       | Command.WeeklyReportCreate date ->
         return! WeeklyReport.generateAsync config dataContext date
       | Command.WeeklyReportConvertToExcel date ->
@@ -57,7 +57,7 @@ module Command =
         let previousMonth = (date |> DateTime.toMonth).AddMonths(-1)
         return! TimeSheet.convertToExcelXmlAndOpenAsync dataContext config previousMonth
       | Command.DailyReportFinalize date ->
-        do! DailyReport.submitAsync config notifier dataContext date
+        do! DailyReport.submitAsync config notifier dataContext smtpService date
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 

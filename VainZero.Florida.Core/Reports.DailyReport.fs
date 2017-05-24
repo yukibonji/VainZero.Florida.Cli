@@ -83,22 +83,30 @@ module DailyReport =
       submitConfig.Password |> Option.getOrElse
         (fun () -> (notifier: INotifier).GetPassword("メールアカウントのパスワード"))
 
+    let message (submitConfig: DailyReportSubmitConfig) date yaml report =
+      let sender = MailAddress(submitConfig.SenderAddress, submitConfig.SenderName)
+      let subject = subject submitConfig date
+      let content = content submitConfig yaml
+      let destination = destination submitConfig report
+      MailMessage(sender, subject, content, destination)
+
+    let sendAsync (submitConfig: DailyReportSubmitConfig) smtpService (password: string) message =
+      async {
+        let server = submitConfig.SmtpServer
+        let credential = NetworkCredential(submitConfig.SenderAddress, password)
+        return! (smtpService: ISmtpService).SendAsync(server, credential, message)
+      }
+
     let submitAsync config notifier dataContext smtpService date =
       async {
         let! report = (dataContext: IDataContext).DailyReports.FindAsync(date)
         let submitConfig = (config: Config).DailyReportSubmitConfig
         match (report, submitConfig) with
         | (ParsableEntry (yaml, report), Some submitConfig) ->
-          let server = submitConfig.SmtpServer
-          let sender = MailAddress(submitConfig.SenderAddress, submitConfig.SenderName)
-          let subject = subject submitConfig date
-          let content = content submitConfig yaml
-          let destination = destination submitConfig report
-          let message = MailMessage(sender, subject, content, destination)
+          let message = message submitConfig date yaml report
           if (notifier: INotifier).Confirm(confirmationMessage message) then
             let password = password submitConfig notifier
-            let credential = NetworkCredential(submitConfig.SenderAddress, password)
-            do! (smtpService: ISmtpService).SendAsync(server, credential, message)
+            do! sendAsync submitConfig smtpService password message
         | (UnparsableEntry (_, e), _) ->
           return! exn("日報の解析に失敗しました。", e) |> raise
         | (UnexistingParsableEntry, _) ->

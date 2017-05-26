@@ -23,7 +23,7 @@ module ``test WeeklyReport`` =
         use dataContext = emptyDataContext ()
         let date = DateTime(2017, 4, 1)
         let (firstDate, lastDate) =
-          WeeklyReport.dateRangeFromDateAsync dataContext date |> Async.RunSynchronously
+          WeeklyReport.dateRangeFromDateAsync dataContext date |> sync
         do! firstDate |> is date
         do! lastDate |> is date
       }
@@ -38,12 +38,12 @@ module ``test WeeklyReport`` =
         // Generate daily reports.
         [|firstDate; middleDate; lastDate|] |> Array.iter
           (fun date ->
-            dataContext.DailyReports.ScaffoldAsync(date) |> Async.RunSynchronously
+            dataContext.DailyReports.ScaffoldAsync(date) |> sync
           )
 
         let date = DateTime(2017, 4, 7)
         do!
-          WeeklyReport.dateRangeFromDateAsync dataContext date |> Async.RunSynchronously
+          WeeklyReport.dateRangeFromDateAsync dataContext date |> sync
           |> is (firstDate, date)
       }
 
@@ -56,15 +56,15 @@ module ``test WeeklyReport`` =
         // Generate daily reports.
         [|firstDate; lastDate|] |> Array.iter
           (fun date ->
-            dataContext.DailyReports.ScaffoldAsync(date) |> Async.RunSynchronously
+            dataContext.DailyReports.ScaffoldAsync(date) |> sync
           )
 
         // Generate a weekly report.
         dataContext.WeeklyReports.AddOrUpdateAsync((firstDate, lastDate), WeeklyReport.empty johnDoe)
-        |> Async.RunSynchronously
+        |> sync
 
         let date = DateTime(2017, 4, 14)
         do!
-          WeeklyReport.dateRangeFromDateAsync dataContext date |> Async.RunSynchronously
+          WeeklyReport.dateRangeFromDateAsync dataContext date |> sync
           |> is (DateTime(2017, 4, 8), date)
       }

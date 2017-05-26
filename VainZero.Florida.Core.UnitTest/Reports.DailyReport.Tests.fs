@@ -153,7 +153,7 @@ module ``test DailyReport`` =
 
       let submit config notifier dataContext smtpService date =
         DailyReport.Submit.submitAsync config notifier dataContext smtpService date
-        |> Async.RunSynchronously
+        |> sync
 
       let ``it raises a parse error if unparsable`` =
         test {

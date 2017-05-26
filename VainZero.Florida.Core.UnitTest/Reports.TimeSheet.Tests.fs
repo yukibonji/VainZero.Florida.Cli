@@ -98,16 +98,16 @@ module ``test TimeSheet`` =
       let ``test case no-timesheet error`` =
         test {
           use dataContext = dataContext ()
-          let! e = trap { it (convertToExcelXmlAsync dataContext config month |> Async.RunSynchronously) }
+          let! e = trap { it (convertToExcelXmlAsync dataContext config month |> sync) }
           do! e.Message |> is "4月分の勤務表がありません。"
         }
 
       let ``test success`` =
         test {
           use dataContext = dataContext ()
-          dataContext.TimeSheets.AddOrUpdateAsync(month, timeSheet) |> Async.RunSynchronously
-          convertToExcelXmlAsync dataContext config month |> Async.RunSynchronously
+          dataContext.TimeSheets.AddOrUpdateAsync(month, timeSheet) |> sync
+          convertToExcelXmlAsync dataContext config month |> sync
           do!
-            dataContext.TimeSheetExcels.ExistsAsync(month) |> Async.RunSynchronously
+            dataContext.TimeSheetExcels.ExistsAsync(month) |> sync
             |> is true
         }

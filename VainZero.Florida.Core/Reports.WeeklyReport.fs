@@ -32,7 +32,7 @@ module WeeklyReport =
         ""
     }
 
-  /// 指定された日付に生成すべき週報の対象となる日付の区間を取得する。
+  /// 指定された日付に生成すべき週報の対象となる日付の区間 (閉区間) を取得する。
   let dateRangeFromDateAsync (context: IDataContext) date =
     async {
       let! latest = context.WeeklyReports.LatestDateRangeAsync(date)

@@ -190,3 +190,26 @@ Florida/Testing: |
 Alaska/Design: 2. Alaska Design
 """
       }
+
+  module ``test ConvertToExcelXml`` =
+    open VainZero.Florida.Reports.WeeklyReport.ConvertToExcelXml
+
+    let ``test dayRowsFromDailyReport`` =
+      test {
+        let simplifiedDailyReport =
+          {
+            日付 =
+              Date.create 2017 4 1
+            作業実績 =
+              [|
+                Work.create "Florida" "Implementation" 1.0 None
+                Work.create "Florida" "Testing" 1.245 None
+              |]
+          }
+        do!
+          simplifiedDailyReport |> dayRowsFromDailyReport |> is
+            [|
+              DayRow.Create("04/01", "土", "Florida", "Implementation", "1.00")
+              DayRow.Create("", "", "Florida", "Testing", "1.25")
+            |]
+      }

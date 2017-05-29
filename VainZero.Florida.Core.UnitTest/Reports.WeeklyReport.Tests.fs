@@ -69,8 +69,8 @@ module ``test WeeklyReport`` =
           |> is (DateTime(2017, 4, 8), date)
       }
 
-  module ``test GenerateFromDailyReports`` =
-    open VainZero.Florida.Reports.WeeklyReport.GenerateFromDailyReports
+  module ``test GenerateFromDailyReportsFunction`` =
+    open VainZero.Florida.Reports.WeeklyReport.GenerateFromDailyReportsFunction
 
     module Seed =
       let date1 = DateTime(2017, 4, 1)
@@ -191,8 +191,8 @@ Alaska/Design: 2. Alaska Design
 """
       }
 
-  module ``test ConvertToExcelXml`` =
-    open VainZero.Florida.Reports.WeeklyReport.ConvertToExcelXml
+  module ``test ConvertToExcelXmlFunction`` =
+    open VainZero.Florida.Reports.WeeklyReport.ConvertToExcelXmlFunction
 
     let ``test dayRowsFromDailyReport`` =
       test {

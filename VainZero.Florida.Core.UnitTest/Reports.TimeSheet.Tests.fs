@@ -8,8 +8,8 @@ open VainZero.Florida.Configurations
 open VainZero.Florida.Data
 
 module ``test TimeSheet`` =
-  module ``test ConvertToExcelXml`` =
-    open TimeSheet.ConvertToExcelXml
+  module ``test ConvertToExcelXmlFunction`` =
+    open TimeSheet.ConvertToExcelXmlFunction
 
     [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     module TimeSheetItem =
@@ -19,7 +19,7 @@ module ``test TimeSheet`` =
     [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     module WorkTime =
       let regular =
-        TimeSheet.ConvertToExcelXml.WorkTime.Create
+        TimeSheet.ConvertToExcelXmlFunction.WorkTime.Create
           ( TimeSpan(9, 0, 0)
           , TimeSpan(17, 0, 0)
           , TimeSpan(1, 0, 0)
@@ -35,7 +35,7 @@ module ``test TimeSheet`` =
         test {
           let case source expected =
             source
-            |> TimeSheet.ConvertToExcelXml.WorkTime.ofTimeSheetItem
+            |> TimeSheet.ConvertToExcelXmlFunction.WorkTime.ofTimeSheetItem
             |> is expected
           let item = TimeSheetItem.regular
           do! case item (Some WorkTime.regular)
@@ -58,7 +58,7 @@ module ``test TimeSheet`` =
       test {
         let month = DateTime(2017, 4, 1)
         let dateRows =
-          TimeSheet.ConvertToExcelXml.dateRows month timeSheet
+          TimeSheet.ConvertToExcelXmlFunction.dateRows month timeSheet
 
         // Verify dates.
         do! dateRows.Length |> is 31

@@ -48,7 +48,7 @@ module WeeklyReport =
           return (date, date)
     }
 
-  module internal GenerateFromDailyReports =
+  module internal GenerateFromDailyReportsFunction =
     /// 指定された日付に生成すべき週報の対象となる日報をすべて検索する。
     let dailyReportsAsync (dataContext: IDataContext) (firstDate, lastDate: DateTime) =
       async {
@@ -156,9 +156,9 @@ module WeeklyReport =
       }
 
   /// 週報を生成して開く。
-  let generateAsync = GenerateFromDailyReports.generateAsync
+  let generateAsync = GenerateFromDailyReportsFunction.generateAsync
 
-  module internal ConvertToExcelXml =
+  module internal ConvertToExcelXmlFunction =
     type DayRow =
       {
         Date:
@@ -243,20 +243,20 @@ module WeeklyReport =
             |]
       xml
 
-  let toExcelXml = ConvertToExcelXml.toExcelXml
+    /// 指定された日付に対応する週報をエクセルファイルに変換して開く。
+    let convertToExcelAsync (dataContext: IDataContext) date =
+      async {
+        let! dateRange = dateRangeFromDateAsync dataContext date
+        let! weeklyReport = dataContext.WeeklyReports.FindAsync(dateRange)
+        match weeklyReport with
+        | ParsableEntry (_, weeklyReport) ->
+          let excelXml = weeklyReport |> toExcelXml
+          do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
+          dataContext.WeeklyReportExcels.Open(dateRange)
+        | UnparsableEntry (_, e) ->
+          return exn("週報の解析に失敗しました。", e) |> raise
+        | UnexistingParsableEntry ->
+          return "エクセルファイルに変換する対象の週報がありません。" |> failwith
+      }
 
-  /// 指定された日付に対応する週報をエクセルファイルに変換して開く。
-  let convertToExcelAsync (dataContext: IDataContext) date =
-    async {
-      let! dateRange = dateRangeFromDateAsync dataContext date
-      let! weeklyReport = dataContext.WeeklyReports.FindAsync(dateRange)
-      match weeklyReport with
-      | ParsableEntry (_, weeklyReport) ->
-        let excelXml = weeklyReport |> toExcelXml
-        do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
-        dataContext.WeeklyReportExcels.Open(dateRange)
-      | UnparsableEntry (_, e) ->
-        return exn("週報の解析に失敗しました。", e) |> raise
-      | UnexistingParsableEntry ->
-        return "エクセルファイルに変換する対象の週報がありません。" |> failwith
-    }
+  let convertToExcelAsync = ConvertToExcelXmlFunction.convertToExcelAsync

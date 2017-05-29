@@ -82,7 +82,7 @@ module ``test DailyReport`` =
           { dailyReport with
               CC = Some [|"report-cc@example.com"|]
           }
-        let destination = DailyReport.Submit.destination submitConfig dailyReport
+        let destination = DailyReport.SubmitFunction.destination submitConfig dailyReport
         do!
           destination.Tos |> Array.map string |> is [|"config-to@example.com"|]
         do!
@@ -103,13 +103,13 @@ module ``test DailyReport`` =
       test {
         let yaml = "BODY\r\n"
         do!
-          DailyReport.Submit.content submitConfig yaml
+          DailyReport.SubmitFunction.content submitConfig yaml
           |> is "Header.\r\nBODY\r\n\r\nFooter."
 
         // No header and footer.
         do!
           let submitConfig = { submitConfig with Header = None; Footer = None } in
-          DailyReport.Submit.content submitConfig yaml
+          DailyReport.SubmitFunction.content submitConfig yaml
           |> is "BODY\r\n"
       }
 
@@ -118,8 +118,8 @@ module ``test DailyReport`` =
         let submitConfig = { submitConfig with Header = None; Footer = None }
         let date = DateTime(2017, 4, 1)
         let yaml = "BODY"
-        let message = DailyReport.Submit.message submitConfig date yaml dailyReport
-        do! DailyReport.Submit.confirmationMessage message |> is
+        let message = DailyReport.SubmitFunction.message submitConfig date yaml dailyReport
+        do! DailyReport.SubmitFunction.confirmationMessage message |> is
               """以下の設定で日報を送信します:
   TO: [config-to@example.com]
   CC: [config-cc@example.com]
@@ -135,14 +135,14 @@ module ``test DailyReport`` =
       let ``it invokes INotifier.GetPassword`` =
         test {
           let notifier = TestNotifier([||], [|password|])
-          do! DailyReport.Submit.password submitConfig (notifier :> INotifier) |> is password
+          do! DailyReport.SubmitFunction.password submitConfig (notifier :> INotifier) |> is password
         }
 
       let ``it prefers default password`` =
         test {
           let notifier = TestNotifier([||], [||])
           let submitConfig = { submitConfig with Password = Some password }
-          do! DailyReport.Submit.password submitConfig (notifier :> INotifier) |> is password
+          do! DailyReport.SubmitFunction.password submitConfig (notifier :> INotifier) |> is password
         }
 
     module ``test submitAsync`` =
@@ -152,7 +152,7 @@ module ``test DailyReport`` =
       let date = DateTime(2017, 4, 1)
 
       let submit config notifier dataContext smtpService date =
-        DailyReport.Submit.submitAsync config notifier dataContext smtpService date
+        DailyReport.SubmitFunction.submitAsync config notifier dataContext smtpService date
         |> sync
 
       let ``it raises a parse error if unparsable`` =

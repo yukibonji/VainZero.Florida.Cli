@@ -37,7 +37,7 @@ module DailyReport =
       dataContext.DailyReports.Open(date)
     }
 
-  module internal Submit =
+  module internal SubmitFunction =
     let destination (submitConfig: DailyReportSubmitConfig) (report: DailyReport) =
       let tos =
         submitConfig.To |> Array.map MailAddress
@@ -115,4 +115,4 @@ module DailyReport =
           return! "日報のメール送信の設定がありません。" |> failwith
       }
 
-  let submitAsync = Submit.submitAsync
+  let submitAsync = SubmitFunction.submitAsync

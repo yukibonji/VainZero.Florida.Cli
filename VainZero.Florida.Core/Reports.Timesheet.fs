@@ -75,7 +75,7 @@ module TimeSheet =
     }
 
   [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-  module ConvertToExcelXml =
+  module ConvertToExcelXmlFunction =
     type WorkTime =
       {
         FirstTime:
@@ -185,7 +185,7 @@ module TimeSheet =
           return! sprintf "%d月分の勤務表がありません。" month.Month |> failwith
       }
 
-  let convertToExcelXmlAsync = ConvertToExcelXml.convertToExcelXmlAsync
+  let convertToExcelXmlAsync = ConvertToExcelXmlFunction.convertToExcelXmlAsync
 
   let convertToExcelXmlAndOpenAsync (dataContext: IDataContext) config month =
     async {

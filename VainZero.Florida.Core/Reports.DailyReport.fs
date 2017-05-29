@@ -97,16 +97,21 @@ module DailyReport =
         return! (smtpService: ISmtpService).SendAsync(server, credential, message)
       }
 
+    let submitCoreAsync notifier submitConfig smtpService date yaml report =
+      async {
+        let message = message submitConfig date yaml report
+        if (notifier: INotifier).Confirm(confirmationMessage message) then
+          let password = password submitConfig notifier
+          do! sendAsync submitConfig smtpService password message
+      }
+
     let submitAsync config notifier dataContext smtpService date =
       async {
         let! report = (dataContext: IDataContext).DailyReports.FindAsync(date)
         let submitConfig = (config: Config).DailyReportSubmitConfig
         match (report, submitConfig) with
         | (ParsableEntry (yaml, report), Some submitConfig) ->
-          let message = message submitConfig date yaml report
-          if (notifier: INotifier).Confirm(confirmationMessage message) then
-            let password = password submitConfig notifier
-            do! sendAsync submitConfig smtpService password message
+          return! submitCoreAsync notifier submitConfig smtpService date yaml report
         | (UnparsableEntry (_, e), _) ->
           return! exn("日報の解析に失敗しました。", e) |> raise
         | (UnexistingParsableEntry, _) ->

@@ -131,23 +131,25 @@ module WeeklyReport =
           config.UserName |> Option.getOr ""
       }
 
+    let weeklyReport staff (reports: array<DateTime * DailyReport>) =
+      let (activityNames, activityNotes) = reports |> activities
+      { empty staff with
+          担当者 = staff
+          今週の主な活動 =
+            activityNames |> String.concatWithLineBreak
+          進捗 =
+            progressList activityNames
+          日別の内容 =
+            simplifiedDailyReports reports
+          今週実績 =
+            weeklyActivity activityNames activityNotes
+      }
+
     let weeklyReportAsync config dataContext dateRange =
       async {
         let! dailyReports = dailyReportsAsync dataContext dateRange
         let staff = staff config
-        let (activityNames, activityNotes) = dailyReports |> activities
-        return
-          { empty staff with
-              担当者 = staff
-              今週の主な活動 =
-                activityNames |> String.concatWithLineBreak
-              進捗 =
-                progressList activityNames
-              日別の内容 =
-                simplifiedDailyReports dailyReports
-              今週実績 =
-                weeklyActivity activityNames activityNotes
-          }
+        return weeklyReport staff dailyReports
       }
 
     let generateAsync config (dataContext: IDataContext) date =

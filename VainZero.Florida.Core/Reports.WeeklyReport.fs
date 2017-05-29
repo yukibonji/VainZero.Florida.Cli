@@ -158,7 +158,7 @@ module WeeklyReport =
   /// 週報を生成して開く。
   let generateAsync = GenerateFromDailyReports.generateAsync
 
-  module private ConvertToExcelXml =
+  module internal ConvertToExcelXml =
     type DayRow =
       {
         Date:
@@ -185,25 +185,28 @@ module WeeklyReport =
       static member Empty =
         DayRow.Create("", "", "", "", "")
 
-    let dayRows (wr: WeeklyReport) =
+    let dayRowsFromDailyReport (dailyReport: SimplifiedDailyReport) =
       [|
-        for dailyReport in wr.日別の内容 do
-          let date = dailyReport.日付 |> Date.toDateTime
-          for (i, work) in dailyReport.作業実績 |> Array.indexed do
-            let dateString =
-              if i = 0 then date.ToString("MM/dd") else ""
-            let dow =
-              if i = 0 then date.DayOfWeek |> DayOfWeek.toKanji else ""
-            let duration =
-              work.工数 |> sprintf "%.2f"
-            yield DayRow.Create(dateString, dow, work.案件, work.内容, duration)
+        let date = dailyReport.日付 |> Date.toDateTime
+        for (i, work) in dailyReport.作業実績 |> Array.indexed do
+          let dateString =
+            if i = 0 then date.ToString("MM/dd") else ""
+          let dow =
+            if i = 0 then date.DayOfWeek |> DayOfWeek.toKanji else ""
+          let duration =
+            work.工数 |> sprintf "%.2f"
+          yield DayRow.Create(dateString, dow, work.案件, work.内容, duration)
       |]
+
+    let dayRowsFromWeeklyReport (wr: WeeklyReport) =
+      wr.日別の内容
+      |> Array.collect dayRowsFromDailyReport
       |> Array.tailpad 10 DayRow.Empty
 
     let toExcelXml (wr: WeeklyReport) =
       let dailyWorkXml =
         wr
-        |> dayRows
+        |> dayRowsFromWeeklyReport
         |> Array.map
           (fun dayRow ->
             dayByDay

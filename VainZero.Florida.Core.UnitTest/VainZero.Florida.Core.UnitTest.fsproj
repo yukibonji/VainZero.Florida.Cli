@@ -51,6 +51,7 @@
     <Compile Include="Text.StructuralTextWriter.Tests.fs" />
     <Compile Include="Misc.Yaml.Tests.fs" />
     <Compile Include="Reports.DailyReport.Tests.fs" />
+    <Compile Include="Reports.WeeklyReport.Tests.fs" />
     <Compile Include="Reports.TimeSheet.Tests.fs" />
   </ItemGroup>
   <ItemGroup>

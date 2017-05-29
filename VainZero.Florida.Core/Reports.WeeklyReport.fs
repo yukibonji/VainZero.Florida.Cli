@@ -145,17 +145,12 @@ module WeeklyReport =
             weeklyActivity activityNames activityNotes
       }
 
-    let weeklyReportAsync config dataContext dateRange =
-      async {
-        let! dailyReports = dailyReportsAsync dataContext dateRange
-        let staff = staff config
-        return weeklyReport staff dailyReports
-      }
-
     let generateAsync config (dataContext: IDataContext) date =
       async {
         let! dateRange = dateRangeFromDateAsync dataContext date
-        let! weeklyReport = weeklyReportAsync config dataContext dateRange
+        let! dailyReports = dailyReportsAsync dataContext dateRange
+        let staff = staff config
+        let weeklyReport = weeklyReport staff dailyReports
         do! dataContext.WeeklyReports.AddOrUpdateAsync(dateRange, weeklyReport)
         dataContext.WeeklyReports.Open(dateRange)
       }

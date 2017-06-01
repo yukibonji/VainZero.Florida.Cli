@@ -4,8 +4,10 @@ open System
 open System.Collections.Generic
 open System.Diagnostics
 open System.IO
+open FSharpKit.ErrorHandling
 open FsYaml
 open VainZero.Collections
+open VainZero.Misc
 open VainZero.IO
 open VainZero.Florida.Misc
 open VainZero.Florida.Reports
@@ -28,11 +30,10 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
     Path.Combine(subdirectory.FullName, fileName)
 
   let dateFromFileName (fileName: string) =
-    // TODO: Don't use exceptions for the purpose.
-    try
-      fileName.[0..9] |> DateTime.Parse |> Some
-    with
-    | _ -> None
+    Option.build {
+      let! dateString = fileName |> String.trySubstring 0 10
+      return! dateString |> DateTime.tryParse
+    }
 
   let templateFile =
     FileInfo(Path.Combine(subdirectory.FullName, "template.yaml"))
@@ -50,13 +51,16 @@ type FileSystemDailyReportRepository(root: DirectoryInfo) =
 
     override this.FindAsync(date) =
       async {
-        try
-          let! yaml = File.readAllTextAsync (filePath date)
-          let report = Yaml.myLoad<DailyReport> yaml
-          return Some (yaml, report)
-        with
-        | _ ->
-          return None
+        let! yaml = File.tryReadAllTextAsync (filePath date)
+        match yaml with
+        | Some yaml ->
+          match Yaml.tryMyLoad<DailyReport> yaml with
+          | Ok report ->
+            return ParsableEntry (yaml, report)
+          | Error e ->
+            return UnparsableEntry (yaml, e)
+        | None ->
+          return UnexistingParsableEntry
       }
 
     override this.FirstDateAsync =
@@ -80,15 +84,16 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
     Path.Combine(subdirectory.FullName, fileName)
 
   let dateRangeFromFileName (fileName: string) =
-    // TODO: Don't use exceptions for the purpose.
-    try
-      let firstDate =
-        fileName.[5..14] |> DateTime.Parse
-      let lastDate =
-        fileName.[19..28] |> DateTime.Parse
-      Some (firstDate, lastDate)
-    with
-    | _ -> None
+    Option.build {
+      let tryParseDate index =
+        Option.build {
+          let! substring = fileName |> String.trySubstring index 10
+          return! substring |> DateTime.tryParse
+        }
+      let! firstDate = tryParseDate 5
+      let! lastDate = tryParseDate 19
+      return (firstDate, lastDate)
+    }
 
   do subdirectory |> DirectoryInfo.createUnlessExists
 
@@ -98,13 +103,16 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
 
     override this.FindAsync(dateRange) =
       async {
-        try
-          let! yaml = File.readAllTextAsync (filePath dateRange)
-          let report = Yaml.myLoad<WeeklyReport> yaml
-          return Some report
-        with
-        | _ ->
-          return None
+        let! yaml = File.tryReadAllTextAsync (filePath dateRange)
+        match yaml with
+        | Some yaml ->
+          match Yaml.tryMyLoad<WeeklyReport> yaml with
+          | Ok report ->
+            return ParsableEntry (yaml, report)
+          | Error e ->
+            return UnparsableEntry (yaml, e)
+        | None ->
+          return UnexistingParsableEntry
       }
 
     override this.AddOrUpdateAsync(dateRange, report) =
@@ -187,6 +195,30 @@ type FileSystemTimeSheetRepository(root: DirectoryInfo) =
         return! File.writeAllTextAsync yaml (filePath month)
       }
 
+type FileSystemTimeSheetExcelRepository(root: DirectoryInfo) =
+  let subdirectory =
+    DirectoryInfo(Path.Combine(root.FullName, "time-sheet-excels"))
+
+  let filePath (month: DateTime) =
+    let fileName = month.ToString("yyyy-MM") + ".xml"
+    Path.Combine(subdirectory.FullName, fileName)
+
+  do subdirectory |> DirectoryInfo.createUnlessExists
+
+  interface ITimeSheetExcelRepository with
+    override this.Open(month) =
+      Process.openFile (filePath month) |> ignore
+
+    override this.ExistsAsync(month) =
+      async {
+        return File.Exists(filePath month)
+      }
+
+    override this.AddOrUpdateAsync(month, content) =
+      async {
+        return! File.writeAllTextAsync content (filePath month)
+      }
+
 type FileSystemDataContext(root: DirectoryInfo) =
   interface IDisposable with
     override this.Dispose() = ()
@@ -203,6 +235,9 @@ type FileSystemDataContext(root: DirectoryInfo) =
 
     override val TimeSheets =
       FileSystemTimeSheetRepository(root) :> ITimeSheetRepository
+
+    override val TimeSheetExcels =
+      FileSystemTimeSheetExcelRepository(root) :> ITimeSheetExcelRepository
 
 type FileSystemDatabase(root: DirectoryInfo) =
   interface IDatabase with

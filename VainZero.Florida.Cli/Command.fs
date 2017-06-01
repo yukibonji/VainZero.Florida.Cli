@@ -1,7 +1,9 @@
 ﻿namespace VainZero.Florida
 
 open System
+open System.IO
 open FSharpKit.ErrorHandling
+open VainZero.Misc
 open VainZero.Florida
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
@@ -25,31 +27,37 @@ module Command =
       "週報をエクセル形式に変換します。"
     | Command.TimeSheetUpdate _ ->
       "勤務表を更新します。"
+    | Command.TimeSheetExcel _ ->
+      "前月の勤務表をエクセル形式に変換します。"
     | Command.DailyReportFinalize _ ->
       "日報を送信し、勤務表を更新します。"
 
   let printUsage usage =
     printfn "%s" usage
 
-  let executeAsync config notifier dataContext command =
-    AsyncResult.build {
+  let executeAsync config notifier dataContext smtpService command =
+    async {
       match command with
       | Command.Empty ->
         ()
       | Command.Usage usage ->
         printUsage usage
+        Console.ReadKey(intercept = true) |> ignore
       | Command.DailyReportCreate date ->
-        do! DailyReport.scaffoldAsync dataContext date
+        return! DailyReport.scaffoldAsync dataContext date
       | Command.DailyReportSendMail date ->
-        return! DailyReport.submitAsync config notifier dataContext date
+        return! DailyReport.submitAsync config notifier dataContext smtpService date
       | Command.WeeklyReportCreate date ->
-        do! WeeklyReport.generateAsync config dataContext date
+        return! WeeklyReport.generateAsync config dataContext date
       | Command.WeeklyReportConvertToExcel date ->
         return! WeeklyReport.convertToExcelAsync dataContext date
       | Command.TimeSheetUpdate date ->
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
+      | Command.TimeSheetExcel date ->
+        let previousMonth = (date |> DateTime.toMonth).AddMonths(-1)
+        return! TimeSheet.convertToExcelXmlAndOpenAsync dataContext config previousMonth
       | Command.DailyReportFinalize date ->
-        do! DailyReport.submitAsync config notifier dataContext date
+        do! DailyReport.submitAsync config notifier dataContext smtpService date
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 
@@ -58,7 +66,7 @@ module Command =
       let! dailyReport = dataContext.DailyReports.FindAsync(date)
 
       // 日報がまだなければ、日報の生成をおすすめする。
-      if dailyReport |> Option.isNone then
+      if dailyReport = UnexistingParsableEntry then
         return Command.DailyReportCreate date |> Some
 
       // 終業が近ければ、日報の送信と勤務表の更新をおすすめする。
@@ -70,9 +78,10 @@ module Command =
         let! dateRange = WeeklyReport.dateRangeFromDateAsync dataContext date
         let! report = dataContext.WeeklyReports.FindAsync dateRange
         match report with
-        | None ->
+        | UnexistingParsableEntry ->
           return Command.WeeklyReportCreate date |> Some
-        | Some _ ->
+        | ParsableEntry _
+        | UnparsableEntry _ ->
           return Command.WeeklyReportConvertToExcel date |> Some
       else
         return None

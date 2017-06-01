@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Collections.Generic
 open FSharpKit.ErrorHandling
 open FsYaml
 open VainZero.Collections
@@ -31,7 +32,7 @@ module WeeklyReport =
         ""
     }
 
-  /// 指定された日付に生成すべき週報の対象となる日付の区間を取得する。
+  /// 指定された日付に生成すべき週報の対象となる日付の区間 (閉区間) を取得する。
   let dateRangeFromDateAsync (context: IDataContext) date =
     async {
       let! latest = context.WeeklyReports.LatestDateRangeAsync(date)
@@ -47,7 +48,7 @@ module WeeklyReport =
           return (date, date)
     }
 
-  module internal GenerateFromDailyReports =
+  module internal GenerateFromDailyReportsFunction =
     /// 指定された日付に生成すべき週報の対象となる日報をすべて検索する。
     let dailyReportsAsync (dataContext: IDataContext) (firstDate, lastDate: DateTime) =
       async {
@@ -57,7 +58,13 @@ module WeeklyReport =
             (fun date ->
               async {
                 let! report = dataContext.DailyReports.FindAsync(date)
-                return report |> Option.map (fun (_, report) -> (date, report))
+                return
+                  match report with
+                  | ParsableEntry (_, report) ->
+                    Some (date, report)
+                  | UnparsableEntry _
+                  | UnexistingParsableEntry ->
+                    None
               }
             )
           |> Async.Parallel
@@ -112,10 +119,9 @@ module WeeklyReport =
         (fun activityName ->
           activityNotes
           |> Map.tryFind activityName
-          |> Option.map (fun note -> (activityName, note))
+          |> Option.map (fun note -> KeyValuePair(activityName, note))
         )
-      |> Map.ofArray // TODO: 順序を保つ。
-      |> Yaml.myDump
+      |> Yaml.myDump<array<KeyValuePair<_, _>>>
 
     let staff (config: Config) =
       {
@@ -125,39 +131,34 @@ module WeeklyReport =
           config.UserName |> Option.getOr ""
       }
 
-    let weeklyReportAsync config dataContext dateRange =
-      async {
-        let! dailyReports = dailyReportsAsync dataContext dateRange
-        let staff = staff config
-        let (activityNames, activityNotes) = dailyReports |> activities
-        return
-          { empty staff with
-              担当者 = staff
-              今週の主な活動 =
-                activityNames |> String.concatWithLineBreak
-              進捗 =
-                progressList activityNames
-              日別の内容 =
-                simplifiedDailyReports dailyReports
-              今週実績 =
-                weeklyActivity activityNames activityNotes
-          }
+    let weeklyReport staff (reports: array<DateTime * DailyReport>) =
+      let (activityNames, activityNotes) = reports |> activities
+      { empty staff with
+          担当者 = staff
+          今週の主な活動 =
+            activityNames |> String.concatWithLineBreak
+          進捗 =
+            progressList activityNames
+          日別の内容 =
+            simplifiedDailyReports reports
+          今週実績 =
+            weeklyActivity activityNames activityNotes
       }
 
     let generateAsync config (dataContext: IDataContext) date =
       async {
         let! dateRange = dateRangeFromDateAsync dataContext date
-        let! weeklyReport = weeklyReportAsync config dataContext dateRange
+        let! dailyReports = dailyReportsAsync dataContext dateRange
+        let staff = staff config
+        let weeklyReport = weeklyReport staff dailyReports
         do! dataContext.WeeklyReports.AddOrUpdateAsync(dateRange, weeklyReport)
         dataContext.WeeklyReports.Open(dateRange)
       }
 
   /// 週報を生成して開く。
-  let generateAsync = GenerateFromDailyReports.generateAsync
+  let generateAsync = GenerateFromDailyReportsFunction.generateAsync
 
-  module private ConvertToExcelXml =
-    let (-->) x y = (x, y)
-
+  module internal ConvertToExcelXmlFunction =
     type DayRow =
       {
         Date:
@@ -184,25 +185,28 @@ module WeeklyReport =
       static member Empty =
         DayRow.Create("", "", "", "", "")
 
-    let dayRows (wr: WeeklyReport) =
+    let dayRowsFromDailyReport (dailyReport: SimplifiedDailyReport) =
       [|
-        for dailyReport in wr.日別の内容 do
-          let date = dailyReport.日付 |> Date.toDateTime
-          for (i, work) in dailyReport.作業実績 |> Array.indexed do
-            let dateString =
-              if i = 0 then date.ToString("MM/dd") else ""
-            let dow =
-              if i = 0 then date.DayOfWeek |> DayOfWeek.toKanji else ""
-            let duration =
-              work.工数 |> sprintf "%.2f"
-            yield DayRow.Create(dateString, dow, work.案件, work.内容, duration)
+        let date = dailyReport.日付 |> Date.toDateTime
+        for (i, work) in dailyReport.作業実績 |> Array.indexed do
+          let dateString =
+            if i = 0 then date.ToString("MM/dd") else ""
+          let dow =
+            if i = 0 then date.DayOfWeek |> DayOfWeek.toKanji else ""
+          let duration =
+            work.工数 |> sprintf "%.2f"
+          yield DayRow.Create(dateString, dow, work.案件, work.内容, duration)
       |]
+
+    let dayRowsFromWeeklyReport (wr: WeeklyReport) =
+      wr.日別の内容
+      |> Array.collect dayRowsFromDailyReport
       |> Array.tailpad 10 DayRow.Empty
 
     let toExcelXml (wr: WeeklyReport) =
       let dailyWorkXml =
         wr
-        |> dayRows
+        |> dayRowsFromWeeklyReport
         |> Array.map
           (fun dayRow ->
             dayByDay
@@ -220,38 +224,39 @@ module WeeklyReport =
         weeklyReport
         |> String.replaceEach
             [|
-              "{{所属部署}}"
-                --> wr.担当者.所属部署
-              "{{担当者名}}"
-                --> wr.担当者.名前
-              "{{今週活動}}"
-                --> (wr.今週の主な活動 |> Xml.escape)
-              "{{進捗}}"
-                --> (wr.進捗 |> Xml.escape)
-              "{{日別の内容}}"
-                --> dailyWorkXml
-              "{{今週実績}}"
-                --> (wr.今週実績 |> Xml.escape)
-              "{{来週予定}}"
-                --> (wr.来週予定 |> Xml.escape)
-              "{{その他}}"
-                --> (wr.その他 |> Xml.escape)
+              "{{所属部署}}" -->
+                wr.担当者.所属部署
+              "{{担当者名}}" -->
+                wr.担当者.名前
+              "{{今週活動}}" -->
+                (wr.今週の主な活動 |> Xml.escape)
+              "{{進捗}}" -->
+                (wr.進捗 |> Xml.escape)
+              "{{日別の内容}}" -->
+                dailyWorkXml
+              "{{今週実績}}" -->
+                (wr.今週実績 |> Xml.escape)
+              "{{来週予定}}" -->
+                (wr.来週予定 |> Xml.escape)
+              "{{その他}}" -->
+                (wr.その他 |> Xml.escape)
             |]
       xml
 
-  let toExcelXml = ConvertToExcelXml.toExcelXml
+    /// 指定された日付に対応する週報をエクセルファイルに変換して開く。
+    let convertToExcelAsync (dataContext: IDataContext) date =
+      async {
+        let! dateRange = dateRangeFromDateAsync dataContext date
+        let! weeklyReport = dataContext.WeeklyReports.FindAsync(dateRange)
+        match weeklyReport with
+        | ParsableEntry (_, weeklyReport) ->
+          let excelXml = weeklyReport |> toExcelXml
+          do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
+          dataContext.WeeklyReportExcels.Open(dateRange)
+        | UnparsableEntry (_, e) ->
+          return exn("週報の解析に失敗しました。", e) |> raise
+        | UnexistingParsableEntry ->
+          return "エクセルファイルに変換する対象の週報がありません。" |> failwith
+      }
 
-  /// 指定された日付に対応する週報をエクセルファイルに変換して開く。
-  let convertToExcelAsync (dataContext: IDataContext) date =
-    async {
-      let! dateRange = dateRangeFromDateAsync dataContext date
-      let! weeklyReport = dataContext.WeeklyReports.FindAsync(dateRange)
-      match weeklyReport with
-      | Some weeklyReport ->
-        let excelXml = weeklyReport |> toExcelXml
-        do! dataContext.WeeklyReportExcels.AddOrUpdateAsync(dateRange, excelXml)
-        dataContext.WeeklyReportExcels.Open(dateRange)
-        return Ok ()
-      | None ->
-        return "週報がありません。" |> Error
-    }
+  let convertToExcelAsync = ConvertToExcelXmlFunction.convertToExcelAsync

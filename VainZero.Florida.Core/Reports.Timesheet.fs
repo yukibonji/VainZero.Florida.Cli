@@ -1,6 +1,7 @@
 ﻿namespace VainZero.Florida.Reports
 
 open System
+open System.IO
 open System.Collections.Generic
 open FSharpKit.ErrorHandling
 open VainZero.Florida
@@ -59,7 +60,7 @@ module TimeSheet =
     async {
       let! report = dataContext.DailyReports.FindAsync(date)
       match report with
-      | Some (_, report) ->
+      | ParsableEntry (_, report) ->
         let item = TimeSheetItem.fromDailyReport config report
         let! timeSheet = dataContext.TimeSheets.FindAsync(date)
         let timeSheet =
@@ -67,7 +68,127 @@ module TimeSheet =
           |> Option.getOrElse (fun () -> create date)
           |> update date.Day item
         do! dataContext.TimeSheets.AddOrUpdateAsync(date, timeSheet)
-        return Ok ()
+      | UnparsableEntry (_, e) ->
+        return! exn("日報を解析できません。", e) |> raise
+      | UnexistingParsableEntry ->
+        return! "勤務表の更新には日報が必要です。" |> failwith
+    }
+
+  [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+  module ConvertToExcelXmlFunction =
+    type WorkTime =
+      {
+        FirstTime:
+          TimeSpan
+        EndTime:
+          TimeSpan
+        Recess:
+          TimeSpan
+      }
+    with
+      static member Create(firstTime, endTime, recess) =
+        {
+          FirstTime =
+            firstTime
+          EndTime =
+            endTime
+          Recess =
+            recess
+        }
+
+      member this.Duration =
+        this.EndTime - this.FirstTime - this.Recess
+
+    [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+    module WorkTime =
+      let ofTimeSheetItem (item: TimeSheetItem) =
+        match (item.開始時刻, item.終了時刻, item.休憩時間) with
+        | (Some firstTime, Some endTime, Some recess) ->
+          WorkTime.Create(firstTime, endTime, recess) |> Some
+        | _ ->
+          None
+
+    type DateRow =
+      int * option<WorkTime> * string
+
+    let dateRows (month: DateTime) (timeSheet: TimeSheet): array<DateRow> =
+      let map = timeSheet |> Seq.map (|KeyValue|) |> Map.ofSeq
+      [|
+        for day in 1..31 do
+          match map |> Map.tryFind day with
+          | Some item ->
+            let note = item.備考 |> Option.getOr ""
+            match item |> WorkTime.ofTimeSheetItem with
+            | Some workTime ->
+              yield (day, Some workTime, note)
+            | None ->
+              yield (day, None, note)
+          | None ->
+            yield (day, None, "")
+      |]
+
+    let excelXmlFromDateRow (month: DateTime) (day, workTime, note) =
+      let date = month.AddDays(float (day - 1))
+      match workTime with
+      | Some workTime ->
+        XmlTemplate.timeSheetWorkingRow |> String.replaceEach
+          [|
+            "{{日付}}" -->
+              date.ToString("yyyy-MM-dd")
+            "{{日}}" -->
+              string day
+            "{{開始時刻}}" -->
+              workTime.FirstTime.ToString("c")
+            "{{終了時刻}}" -->
+              workTime.EndTime.ToString("c")
+            "{{休憩時間}}" -->
+              workTime.Recess.ToString("c")
+            "{{勤務時間}}" -->
+              workTime.Duration.ToString("c")
+            "{{備考}}" -->
+              note
+          |]
       | None ->
-        return Error "勤務表の更新には日報が必要です。"
+        XmlTemplate.timeSheetEmptyRow |> String.replaceEach
+          [|
+            "{{日付}}" -->
+              date.ToString("yyyy-MM-dd")
+            "{{日}}" -->
+              string day
+            "{{備考}}" -->
+              note
+          |]
+
+    let excelXml (config: Config) (month: DateTime) timeSheet =
+      XmlTemplate.timeSheet |> String.replaceEach
+        [|
+          "{{日付}}" -->
+            month.ToString("yyyy-MM-dd")
+          "{{名前}}" -->
+            (config.UserName |> Option.getOr "")
+          "{{行}}" -->
+            (
+              dateRows month timeSheet
+              |> Array.map (excelXmlFromDateRow month)
+              |> String.concatWithLineBreak
+            )
+        |]
+
+    let convertToExcelXmlAsync (dataContext: IDataContext) config month =
+      async {
+        let! timeSheet = dataContext.TimeSheets.FindAsync(month)
+        match timeSheet with
+        | Some timeSheet ->
+          let xml = excelXml config month timeSheet
+          return! dataContext.TimeSheetExcels.AddOrUpdateAsync(month, xml)
+        | None ->
+          return! sprintf "%d月分の勤務表がありません。" month.Month |> failwith
+      }
+
+  let convertToExcelXmlAsync = ConvertToExcelXmlFunction.convertToExcelXmlAsync
+
+  let convertToExcelXmlAndOpenAsync (dataContext: IDataContext) config month =
+    async {
+      do! convertToExcelXmlAsync dataContext config month
+      dataContext.TimeSheetExcels.Open(month)
     }

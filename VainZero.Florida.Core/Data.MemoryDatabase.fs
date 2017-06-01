@@ -11,7 +11,9 @@ open VainZero.Florida.Misc
 open VainZero.Florida.Reports
 
 type MemoryDailyReportRepository() =
-  let dictionary = Dictionary<DateTime, string * DailyReport>()
+  let dictionary = Dictionary<DateTime, ParsableEntry<string, DailyReport>>()
+
+  member this.Dictionary = dictionary
 
   interface IDailyReportRepository with
     override this.Open(_) =
@@ -21,16 +23,16 @@ type MemoryDailyReportRepository() =
       async {
         let dailyReport = DailyReport.empty
         let yaml = Yaml.myDump dailyReport
-        dictionary.[date] <- (yaml, dailyReport)
+        dictionary.[date] <- ParsableEntry (yaml, dailyReport)
       }
 
     override this.FindAsync(date) =
       async {
         match dictionary.TryGetValue(date) with
         | (true, value) ->
-          return Some value
+          return value
         | (false, _) ->
-          return None
+          return UnexistingParsableEntry
       }
 
     override this.FirstDateAsync =
@@ -49,9 +51,10 @@ type MemoryWeeklyReportRepository() =
       async {
         match dictionary.TryGetValue(dateRange) with
         | (true, report) ->
-          return Some report
+          let yaml = Yaml.myDump report
+          return ParsableEntry (yaml, report)
         | (false, _) ->
-          return None
+          return UnexistingParsableEntry
       }
 
     override this.AddOrUpdateAsync(dateRange, report) =
@@ -90,6 +93,23 @@ type MemoryTimeSheetRepository() =
         dictionary |> Dictionary.addOrSet month timeSheet
       }
 
+type MemoryTimeSheetExcelRepository() =
+  let dictionary = Dictionary<DateTime, string>()
+
+  interface ITimeSheetExcelRepository with
+    override this.Open(_) =
+      ()
+
+    override this.ExistsAsync(month) =
+      async {
+        return dictionary.ContainsKey(month) 
+      }
+
+    override this.AddOrUpdateAsync(month, content) =
+      async {
+        dictionary |> Dictionary.addOrSet month content
+      }
+
 type MemoryDataContext() =
   interface IDisposable with
     override this.Dispose() = ()
@@ -106,6 +126,9 @@ type MemoryDataContext() =
 
     override val TimeSheets =
       MemoryTimeSheetRepository() :> ITimeSheetRepository
+
+    override val TimeSheetExcels =
+      MemoryTimeSheetExcelRepository() :> ITimeSheetExcelRepository
 
 type MemoryDatabase() =
   let context = new MemoryDataContext()

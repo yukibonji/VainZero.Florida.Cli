@@ -9,6 +9,7 @@ open FsYaml
 open VainZero.Misc
 open VainZero.Florida.Configurations
 open VainZero.Florida.Data
+open VainZero.Florida.Net.Mail
 open VainZero.Florida.Reports
 open VainZero.Florida.UI.Notifications
 
@@ -43,14 +44,20 @@ module Program =
   let runAsync args =
     async {
       try
+        let smtpService = SmtpService.create ()
         let notifier = ConsoleNotifier() :> INotifier
-        let config = Config.load notifier
+        let! config = Config.loadAsync ()
         let database = FileSystemDatabase(DirectoryInfo(config.RootDirectory)) :> IDatabase
         use dataContext = database.Connect()
         let! command = createCommandAsync config dataContext args
-        return! Command.executeAsync config notifier dataContext command
+        do! Command.executeAsync config notifier dataContext smtpService command
+        return Ok ()
       with
       | e ->
+        eprintfn "ERROR:"
+        eprintfn "%s" (e |> string)
+        if args |> Array.isEmpty then
+          Console.ReadKey() |> ignore
         return e |> string |> Error
     }
 
@@ -60,8 +67,4 @@ module Program =
     | Ok () ->
       0 // success
     | Error error ->
-      eprintfn "ERROR:"
-      eprintfn "%s" error
-      if args |> Array.isEmpty then
-        Console.ReadKey() |> ignore
       1 // error

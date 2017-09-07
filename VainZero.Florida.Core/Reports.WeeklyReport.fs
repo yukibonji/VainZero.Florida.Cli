@@ -71,6 +71,14 @@ module WeeklyReport =
         return reports |> Array.choose id
       }
 
+    /// 週報の日付の区間を、実際に日報があった区間に縮める。
+    let minimalDateRange (dailyReports: array<DateTime * _>) =
+      if dailyReports |> Array.isEmpty then
+        "週報にまとめる対象の日報がありません。" |> failwith
+      else
+        let dates = dailyReports |> Seq.map fst |> Seq.sort
+        (dates |> Seq.min, dates |> Seq.max)
+
     /// 日報に含まれる作業の名前のリストと、作業の名前から備考への辞書を生成する。
     /// 同内容の作業が複数の日報に渡っている場合は、1つにまとめる。
     let activities reports =
@@ -149,6 +157,7 @@ module WeeklyReport =
       async {
         let! dateRange = dateRangeFromDateAsync dataContext date
         let! dailyReports = dailyReportsAsync dataContext dateRange
+        let dateRange = minimalDateRange dailyReports
         let staff = staff config
         let weeklyReport = weeklyReport staff dailyReports
         do! dataContext.WeeklyReports.AddOrUpdateAsync(dateRange, weeklyReport)

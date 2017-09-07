@@ -28,7 +28,7 @@ module ``test WeeklyReport`` =
         do! lastDate |> is date
       }
 
-    let ``case if no weekly report exists`` =
+    let ``test case if no weekly report exists`` =
       test {
         use dataContext = emptyDataContext ()
         let firstDate = DateTime(2017, 4, 1)
@@ -121,6 +121,12 @@ module ``test WeeklyReport`` =
         use dataContext = seed ()
         let reports = dailyReportsAsync dataContext (Seed.date1, Seed.date6) |> sync
         do! reports |> is Seed.reports
+      }
+
+    let ``test minimalDateRange`` =
+      test {
+        let dateRange = minimalDateRange Seed.reports
+        do! dateRange |> is (Seed.date1, Seed.date6)
       }
 
     let ``test activities`` =

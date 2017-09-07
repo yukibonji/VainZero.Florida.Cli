@@ -143,7 +143,7 @@ type FileSystemWeeklyReportRepository(root: DirectoryInfo) =
             | None ->
               loop (i + 1)
           else None
-        return loop 1
+        return loop 0
       }
 
 type FileSystemWeeklyReportExcelRepository(root: DirectoryInfo) =

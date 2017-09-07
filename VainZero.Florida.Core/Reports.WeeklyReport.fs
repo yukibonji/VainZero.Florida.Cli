@@ -38,7 +38,16 @@ module WeeklyReport =
       let! latest = context.WeeklyReports.LatestDateRangeAsync(date)
       match latest with
       | Some (firstDate, lastDate) ->
-        return (lastDate.AddDays(1.0), date)
+        let! existsNewerDailyReport =
+          async {
+            let dates = DateTime.dates (lastDate.AddDays(1.0)) (date.AddDays(1.0))
+            let! reports = DailyReport.findByRangeAsync context dates
+            return reports |> Array.isEmpty |> not
+          }
+        return
+          if existsNewerDailyReport
+          then (lastDate.AddDays(1.0), date)
+          else (firstDate, lastDate)
       | None ->
         let! firstDate = context.DailyReports.FirstDateAsync
         match firstDate with
@@ -50,26 +59,8 @@ module WeeklyReport =
 
   module internal GenerateFromDailyReportsFunction =
     /// 指定された日付に生成すべき週報の対象となる日報をすべて検索する。
-    let dailyReportsAsync (dataContext: IDataContext) (firstDate, lastDate: DateTime) =
-      async {
-        let! reports =
-          DateTime.dates firstDate (lastDate.AddDays(1.0))
-          |> Seq.map
-            (fun date ->
-              async {
-                let! report = dataContext.DailyReports.FindAsync(date)
-                return
-                  match report with
-                  | ParsableEntry (_, report) ->
-                    Some (date, report)
-                  | UnparsableEntry _
-                  | UnexistingParsableEntry ->
-                    None
-              }
-            )
-          |> Async.Parallel
-        return reports |> Array.choose id
-      }
+    let dailyReportsAsync dataContext (firstDate, lastDate: DateTime) =
+      DailyReport.findByRangeAsync dataContext (DateTime.dates firstDate (lastDate.AddDays(1.0)))
 
     /// 週報の日付の区間を、実際に日報があった区間に縮める。
     let minimalDateRange (dailyReports: array<DateTime * _>) =

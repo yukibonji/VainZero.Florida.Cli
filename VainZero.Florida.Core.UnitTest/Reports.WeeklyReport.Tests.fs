@@ -47,7 +47,7 @@ module ``test WeeklyReport`` =
           |> is (firstDate, date)
       }
 
-    let ``test case if weekly reports exist`` =
+    let ``test case if the latest weekly report doesn't exists`` =
       test {
         use dataContext = emptyDataContext ()
         let firstDate = DateTime(2017, 4, 1)
@@ -63,10 +63,35 @@ module ``test WeeklyReport`` =
         dataContext.WeeklyReports.AddOrUpdateAsync((firstDate, lastDate), WeeklyReport.empty johnDoe)
         |> sync
 
+        // Generate new daily report, which obsoletes the weekly report.
         let date = DateTime(2017, 4, 14)
+        dataContext.DailyReports.ScaffoldAsync(date) |> sync
+
         do!
           WeeklyReport.dateRangeFromDateAsync dataContext date |> sync
           |> is (DateTime(2017, 4, 8), date)
+      }
+
+    let ``test case if the latest weekly reports exist`` =
+      test {
+        use dataContext = emptyDataContext ()
+        let firstDate = DateTime(2017, 4, 1)
+        let lastDate = DateTime(2017, 4, 7)
+
+        // Generate daily reports.
+        [|firstDate; lastDate|] |> Array.iter
+          (fun date ->
+            dataContext.DailyReports.ScaffoldAsync(date) |> sync
+          )
+
+        // Generate a weekly report, which is the latest.
+        dataContext.WeeklyReports.AddOrUpdateAsync((firstDate, lastDate), WeeklyReport.empty johnDoe)
+        |> sync
+
+        let date = DateTime(2017, 4, 14)
+        do!
+          WeeklyReport.dateRangeFromDateAsync dataContext date |> sync
+          |> is (firstDate, lastDate)
       }
 
   module ``test GenerateFromDailyReportsFunction`` =

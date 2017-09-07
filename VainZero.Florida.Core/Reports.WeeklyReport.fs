@@ -38,7 +38,16 @@ module WeeklyReport =
       let! latest = context.WeeklyReports.LatestDateRangeAsync(date)
       match latest with
       | Some (firstDate, lastDate) ->
-        return (lastDate.AddDays(1.0), date)
+        let! existsNewerDailyReport =
+          async {
+            let dates = DateTime.dates (lastDate.AddDays(1.0)) (date.AddDays(1.0))
+            let! reports = DailyReport.findByRangeAsync context dates
+            return reports |> Array.isEmpty |> not
+          }
+        return
+          if existsNewerDailyReport
+          then (lastDate.AddDays(1.0), date)
+          else (firstDate, lastDate)
       | None ->
         let! firstDate = context.DailyReports.FirstDateAsync
         match firstDate with

@@ -61,17 +61,24 @@ module Command =
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 
-  let tryRecommendAsync (config: Config) (dataContext: IDataContext) date =
+  let executeManyAsync config notifier dataContext smtpService (commands: array<_>) =
     async {
+      for command in commands do
+        do! executeAsync config notifier dataContext smtpService command
+    }
+
+  let recommendAsync (config: Config) (dataContext: IDataContext) date =
+    async {
+      let commands = ResizeArray<_>()
       let! dailyReport = dataContext.DailyReports.FindAsync(date)
 
       // 日報がまだなければ、日報の生成をおすすめする。
       if dailyReport = UnexistingParsableEntry then
-        return Command.DailyReportCreate date |> Some
+        commands.Add(Command.DailyReportCreate date)
 
       // 終業が近ければ、日報の送信と勤務表の更新をおすすめする。
       else if date.TimeOfDay > TimeSpan(16, 30, 0) then
-        return Command.DailyReportFinalize date |> Some
+        commands.Add(Command.DailyReportFinalize date)
 
       // 週例会議の日なら、週報関連の作業をおすすめする。
       else if date.DayOfWeek = config.WeeklyReportConfig.MeetingDay then
@@ -79,10 +86,10 @@ module Command =
         let! report = dataContext.WeeklyReports.FindAsync dateRange
         match report with
         | UnexistingParsableEntry ->
-          return Command.WeeklyReportCreate date |> Some
+          commands.Add(Command.WeeklyReportCreate date)
         | ParsableEntry _
         | UnparsableEntry _ ->
-          return Command.WeeklyReportConvertToExcel date |> Some
-      else
-        return None
+          commands.Add(Command.WeeklyReportConvertToExcel date)
+
+      return commands.ToArray()
     }

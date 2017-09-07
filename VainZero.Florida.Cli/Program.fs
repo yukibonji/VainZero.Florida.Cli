@@ -14,31 +14,31 @@ open VainZero.Florida.Reports
 open VainZero.Florida.UI.Notifications
 
 module Program =
-  let readCommandFromConsole () =
+  let readCommandsFromConsole () =
     Arguments.parser.PrintUsage() |> Command.printUsage
     printfn "コマンドライン引数を入力してください:"
     match Console.ReadLine() with
     | null ->
-      Command.Empty
+      Array.empty
     | line ->
-      Arguments.parse (line |> String.splitBySpaces)
+      Arguments.parse (line |> String.splitBySpaces) |> Array.singleton
 
-  let createCommandAsync config dataContext args =
+  let createCommandsAsync config dataContext args =
     async {
       if args |> Array.isEmpty then
-        let! command = Command.tryRecommendAsync config dataContext DateTime.Now
-        match command with
-        | Some command ->
+        let! commands = Command.recommendAsync config dataContext DateTime.Now
+        if commands |> Array.isEmpty then
+          return readCommandsFromConsole ()
+        else
           printfn "次のコマンドがおすすめです:"
-          printfn "  - %s" (command |> Command.toHelp)
+          for command in commands do
+            printfn "  - %s" (command |> Command.toHelp)
           if Console.readYesNo "これを実行しますか？" then
-            return command
+            return commands
           else
-            return readCommandFromConsole ()
-        | None ->
-          return readCommandFromConsole ()
+            return readCommandsFromConsole ()
       else
-        return Arguments.parse args
+        return Arguments.parse args |> Array.singleton
     }
 
   let runAsync args =
@@ -49,8 +49,8 @@ module Program =
         let! config = Config.loadAsync ()
         let database = FileSystemDatabase(DirectoryInfo(config.RootDirectory)) :> IDatabase
         use dataContext = database.Connect()
-        let! command = createCommandAsync config dataContext args
-        do! Command.executeAsync config notifier dataContext smtpService command
+        let! commands = createCommandsAsync config dataContext args
+        do! Command.executeManyAsync config notifier dataContext smtpService commands
         return Ok ()
       with
       | e ->

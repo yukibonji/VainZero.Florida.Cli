@@ -37,6 +37,27 @@ module DailyReport =
       dataContext.DailyReports.Open(date)
     }
 
+  let findByRangeAsync (dataContext: IDataContext) dates =
+    async {
+      let! reports =
+        dates
+        |> Seq.map
+          (fun date ->
+            async {
+              let! report = dataContext.DailyReports.FindAsync(date)
+              return
+                match report with
+                | ParsableEntry (_, report) ->
+                  Some (date, report)
+                | UnparsableEntry _
+                | UnexistingParsableEntry ->
+                  None
+            }
+          )
+        |> Async.Parallel
+      return reports |> Array.choose id
+    }
+
   module internal SubmitFunction =
     let destination (submitConfig: DailyReportSubmitConfig) (report: DailyReport) =
       let tos =

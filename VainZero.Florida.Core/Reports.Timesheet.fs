@@ -192,3 +192,14 @@ module TimeSheet =
       do! convertToExcelXmlAsync dataContext config month
       dataContext.TimeSheetExcels.Open(month)
     }
+
+  let existsConvertibleAsync (dataContext: IDataContext) month =
+    async {
+      let! timeSheet = dataContext.TimeSheets.FindAsync(month)
+      match timeSheet with
+      | Some _ ->
+        let! isConverted = dataContext.TimeSheetExcels.ExistsAsync(month)
+        return isConverted |> not
+      | None ->
+        return false
+    }

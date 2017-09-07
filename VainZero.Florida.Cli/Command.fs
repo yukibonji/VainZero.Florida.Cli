@@ -70,9 +70,9 @@ module Command =
   let recommendAsync (config: Config) (dataContext: IDataContext) date =
     async {
       let commands = ResizeArray<_>()
-      let! dailyReport = dataContext.DailyReports.FindAsync(date)
 
       // 日報がまだなければ、日報の生成をおすすめする。
+      let! dailyReport = dataContext.DailyReports.FindAsync(date)
       if dailyReport = UnexistingParsableEntry then
         commands.Add(Command.DailyReportCreate date)
 
@@ -90,6 +90,12 @@ module Command =
         | ParsableEntry _
         | UnparsableEntry _ ->
           commands.Add(Command.WeeklyReportConvertToExcel date)
+
+      // 変換可能な勤務表があれば、その変換をおすすめする。
+      let previousMonth = date.AddMonths(-1) |> DateTime.toMonth
+      let! timeSheetExists = TimeSheet.existsConvertibleAsync dataContext previousMonth
+      if timeSheetExists then
+        commands.Add(Command.TimeSheetExcel previousMonth)
 
       return commands.ToArray()
     }

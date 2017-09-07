@@ -81,7 +81,7 @@ module Command =
         commands.Add(Command.DailyReportFinalize date)
 
       // 週例会議の日なら、週報関連の作業をおすすめする。
-      else if date.DayOfWeek = config.WeeklyReportConfig.MeetingDay then
+      if date.DayOfWeek = config.WeeklyReportConfig.MeetingDay then
         let! dateRange = WeeklyReport.dateRangeFromDateAsync dataContext date
         let! report = dataContext.WeeklyReports.FindAsync dateRange
         match report with

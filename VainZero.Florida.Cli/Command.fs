@@ -61,28 +61,41 @@ module Command =
         return! TimeSheet.createOrUpdateAsync dataContext config.TimeSheetConfig date
     }
 
-  let tryRecommendAsync (config: Config) (dataContext: IDataContext) date =
+  let executeManyAsync config notifier dataContext smtpService (commands: array<_>) =
     async {
-      let! dailyReport = dataContext.DailyReports.FindAsync(date)
+      for command in commands do
+        do! executeAsync config notifier dataContext smtpService command
+    }
+
+  let recommendAsync (config: Config) (dataContext: IDataContext) date =
+    async {
+      let commands = ResizeArray<_>()
 
       // 日報がまだなければ、日報の生成をおすすめする。
+      let! dailyReport = dataContext.DailyReports.FindAsync(date)
       if dailyReport = UnexistingParsableEntry then
-        return Command.DailyReportCreate date |> Some
+        commands.Add(Command.DailyReportCreate date)
 
       // 終業が近ければ、日報の送信と勤務表の更新をおすすめする。
       else if date.TimeOfDay > TimeSpan(16, 30, 0) then
-        return Command.DailyReportFinalize date |> Some
+        commands.Add(Command.DailyReportFinalize date)
 
       // 週例会議の日なら、週報関連の作業をおすすめする。
-      else if date.DayOfWeek = config.WeeklyReportConfig.MeetingDay then
+      if date.DayOfWeek = config.WeeklyReportConfig.MeetingDay then
         let! dateRange = WeeklyReport.dateRangeFromDateAsync dataContext date
         let! report = dataContext.WeeklyReports.FindAsync dateRange
         match report with
         | UnexistingParsableEntry ->
-          return Command.WeeklyReportCreate date |> Some
+          commands.Add(Command.WeeklyReportCreate date)
         | ParsableEntry _
         | UnparsableEntry _ ->
-          return Command.WeeklyReportConvertToExcel date |> Some
-      else
-        return None
+          commands.Add(Command.WeeklyReportConvertToExcel date)
+
+      // 変換可能な勤務表があれば、その変換をおすすめする。
+      let previousMonth = date.AddMonths(-1) |> DateTime.toMonth
+      let! timeSheetExists = TimeSheet.existsConvertibleAsync dataContext previousMonth
+      if timeSheetExists then
+        commands.Add(Command.TimeSheetExcel previousMonth)
+
+      return commands.ToArray()
     }

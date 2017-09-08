@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "300-Cli", "300-Cli", "{8C41
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VainZero.Florida.Cli", "VainZero.Florida.Cli\VainZero.Florida.Cli.fsproj", "{50B0FD12-1C49-4790-A7AA-F25B108005A9}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VainZero.Florida.Cli.UnitTest", "VainZero.Florida.Cli.UnitTest\VainZero.Florida.Cli.UnitTest.fsproj", "{CDC97338-763F-4CE1-A084-84E7E16BD122}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{50B0FD12-1C49-4790-A7AA-F25B108005A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50B0FD12-1C49-4790-A7AA-F25B108005A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50B0FD12-1C49-4790-A7AA-F25B108005A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDC97338-763F-4CE1-A084-84E7E16BD122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDC97338-763F-4CE1-A084-84E7E16BD122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDC97338-763F-4CE1-A084-84E7E16BD122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDC97338-763F-4CE1-A084-84E7E16BD122}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,5 +45,6 @@ Global
 		{F17A3B59-F8D7-4506-967E-9FE3B55AB45F} = {3AE0E4CD-F453-4061-98B1-F87D153E4D38}
 		{AF8D75C2-06A0-409A-B976-266E19BFBB38} = {3AE0E4CD-F453-4061-98B1-F87D153E4D38}
 		{50B0FD12-1C49-4790-A7AA-F25B108005A9} = {8C41A645-9E9B-4500-B4F8-AD55FB80226E}
+		{CDC97338-763F-4CE1-A084-84E7E16BD122} = {8C41A645-9E9B-4500-B4F8-AD55FB80226E}
 	EndGlobalSection
 EndGlobal
